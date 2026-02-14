@@ -118,6 +118,111 @@ Cookie: session=<session-id>
 ---
 
 ### Get Current User
+Gets information about the currently authenticated user.
+
+**Endpoint:** `GET /api/auth/me`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "user": {
+    "user_id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "role": "admin",
+    "first_name": "John",
+    "last_name": "Doe"
+  }
+}
+```
+
+---
+
+### Change User Role
+Changes a user's role. **Admin only**.
+
+**Endpoint:** `PUT /api/auth/change-role`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Request Body:**
+```json
+{
+  "user_id": 5,
+  "new_role": "admin"
+}
+```
+
+**Response (Success - 200):**
+```json
+{
+  "message": "User role updated successfully from employee to admin",
+  "user": {
+    "user_id": 5,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "old_role": "employee",
+    "new_role": "admin"
+  }
+}
+```
+
+**Response (Error - 403):**
+```json
+{
+  "error": "Unauthorized. Admin access required"
+}
+```
+
+**Response (Error - 404):**
+```json
+{
+  "error": "User not found"
+}
+```
+
+**Response (Error - 400):**
+```json
+{
+  "error": "Cannot change your own role"
+}
+```
+
+**Notes:**
+- Only users with `admin` role can change roles
+- Admins cannot change their own role
+- Valid roles: `admin`, `employee`
+
+---
+
+### Refresh Token
+Refreshes the access token.
+
+**Endpoint:** `POST /api/auth/refresh`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "access_token": "new.jwt.token"
+}
+```
+
+---
+
+### Get Current User
 Retrieves the currently authenticated user's information.
 
 **Endpoint:** `GET /api/auth/me`
