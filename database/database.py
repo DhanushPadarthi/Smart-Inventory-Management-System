@@ -3,7 +3,7 @@ Database connection and utilities
 """
 import sqlite3
 import pymysql
-from config import Config
+from backend.config import Config
 import os
 
 def get_db_connection():

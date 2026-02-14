@@ -88,7 +88,7 @@ def register_user(db_connection):
         cursor = db_connection.cursor()
         
         # Check if using SQLite or MySQL
-        from config import Config
+        from backend.config import Config
         use_sqlite = Config.USE_SQLITE
         
         # Check if username already exists
@@ -168,7 +168,7 @@ def login_user(db_connection):
         password = data['password']
         
         # Check if using SQLite or MySQL
-        from config import Config
+        from backend.config import Config
         use_sqlite = Config.USE_SQLITE
         
         cursor = db_connection.cursor()
@@ -257,7 +257,7 @@ def get_current_user(db_connection):
         user_id = identity['user_id']
         
         # Check if using SQLite or MySQL
-        from config import Config
+        from backend.config import Config
         use_sqlite = Config.USE_SQLITE
         
         cursor = db_connection.cursor()

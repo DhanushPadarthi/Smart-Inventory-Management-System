@@ -13,7 +13,10 @@ ENV/
 instance/
 .webassets-cache
 
-# Database
+# Database (exclude the actual database file but keep the folder structure)
+database/*.db
+database/*.sqlite
+database/*.sqlite3
 *.db
 *.sqlite
 *.sqlite3

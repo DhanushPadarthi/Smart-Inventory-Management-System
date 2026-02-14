@@ -14,7 +14,7 @@ class Config:
     
     # Database configuration
     USE_SQLITE = os.environ.get('USE_SQLITE', 'True').lower() == 'true'
-    SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH') or 'inventory.db'
+    SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH') or 'database/inventory.db'
     
     # MySQL configuration (if USE_SQLITE is False)
     DB_HOST = os.environ.get('DB_HOST') or 'localhost'

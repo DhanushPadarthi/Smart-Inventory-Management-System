@@ -4,7 +4,7 @@ Smart Inventory Management System - Main Application
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from config import Config
+from backend.config import Config
 from database.database import get_db_connection, init_db
 from backend.auth import register_user, login_user, get_current_user, refresh_token
 import os
