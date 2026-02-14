@@ -87,14 +87,26 @@ def register_user(db_connection):
         
         cursor = db_connection.cursor()
         
+        # Check if using SQLite or MySQL
+        from config import Config
+        use_sqlite = Config.USE_SQLITE
+        
         # Check if username already exists
-        cursor.execute("SELECT user_id FROM users WHERE username = %s", (username,))
+        if use_sqlite:
+            cursor.execute("SELECT user_id FROM users WHERE username = ?", (username,))
+        else:
+            cursor.execute("SELECT user_id FROM users WHERE username = %s", (username,))
+        
         if cursor.fetchone():
             cursor.close()
             return jsonify({'error': 'Username already exists'}), 409
         
         # Check if email already exists
-        cursor.execute("SELECT user_id FROM users WHERE email = %s", (email,))
+        if use_sqlite:
+            cursor.execute("SELECT user_id FROM users WHERE email = ?", (email,))
+        else:
+            cursor.execute("SELECT user_id FROM users WHERE email = %s", (email,))
+        
         if cursor.fetchone():
             cursor.close()
             return jsonify({'error': 'Email already exists'}), 409
@@ -111,10 +123,17 @@ def register_user(db_connection):
             pass
         
         # Insert new user
-        query = """
-            INSERT INTO users (username, email, password_hash, role, first_name, last_name, phone, created_by)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
+        if use_sqlite:
+            query = """
+                INSERT INTO users (username, email, password_hash, role, first_name, last_name, phone, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """
+        else:
+            query = """
+                INSERT INTO users (username, email, password_hash, role, first_name, last_name, phone, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+        
         cursor.execute(query, (username, email, password_hash, role, first_name, last_name, phone, created_by))
         db_connection.commit()
         
@@ -148,20 +167,39 @@ def login_user(db_connection):
         username = data['username'].strip()
         password = data['password']
         
-        cursor = db_connection.cursor(dictionary=True)
+        # Check if using SQLite or MySQL
+        from config import Config
+        use_sqlite = Config.USE_SQLITE
+        
+        cursor = db_connection.cursor()
         
         # Get user by username
-        query = """
-            SELECT user_id, username, email, password_hash, role, first_name, last_name, is_active
-            FROM users
-            WHERE username = %s
-        """
-        cursor.execute(query, (username,))
-        user = cursor.fetchone()
+        if use_sqlite:
+            query = """
+                SELECT user_id, username, email, password_hash, role, first_name, last_name, is_active
+                FROM users
+                WHERE username = ?
+            """
+        else:
+            query = """
+                SELECT user_id, username, email, password_hash, role, first_name, last_name, is_active
+                FROM users
+                WHERE username = %s
+            """
         
-        if not user:
+        cursor.execute(query, (username,))
+        row = cursor.fetchone()
+        
+        if not row:
             cursor.close()
             return jsonify({'error': 'Invalid username or password'}), 401
+        
+        # Convert to dict if SQLite
+        if use_sqlite:
+            from database.database import dict_from_row
+            user = dict_from_row(row)
+        else:
+            user = row
         
         # Check if user is active
         if not user['is_active']:
@@ -174,8 +212,13 @@ def login_user(db_connection):
             return jsonify({'error': 'Invalid username or password'}), 401
         
         # Update last login timestamp
-        cursor.execute("UPDATE users SET last_login = %s WHERE user_id = %s", 
-                      (datetime.now(), user['user_id']))
+        if use_sqlite:
+            cursor.execute("UPDATE users SET last_login = ? WHERE user_id = ?", 
+                          (datetime.now(), user['user_id']))
+        else:
+            cursor.execute("UPDATE users SET last_login = %s WHERE user_id = %s", 
+                          (datetime.now(), user['user_id']))
+        
         db_connection.commit()
         cursor.close()
         
@@ -213,18 +256,38 @@ def get_current_user(db_connection):
         identity = get_jwt_identity()
         user_id = identity['user_id']
         
-        cursor = db_connection.cursor(dictionary=True)
-        query = """
-            SELECT user_id, username, email, role, first_name, last_name, phone, created_at, last_login
-            FROM users
-            WHERE user_id = %s AND is_active = TRUE
-        """
+        # Check if using SQLite or MySQL
+        from config import Config
+        use_sqlite = Config.USE_SQLITE
+        
+        cursor = db_connection.cursor()
+        
+        if use_sqlite:
+            query = """
+                SELECT user_id, username, email, role, first_name, last_name, phone, created_at, last_login
+                FROM users
+                WHERE user_id = ? AND is_active = 1
+            """
+        else:
+            query = """
+                SELECT user_id, username, email, role, first_name, last_name, phone, created_at, last_login
+                FROM users
+                WHERE user_id = %s AND is_active = TRUE
+            """
+        
         cursor.execute(query, (user_id,))
-        user = cursor.fetchone()
+        row = cursor.fetchone()
         cursor.close()
         
-        if not user:
+        if not row:
             return jsonify({'error': 'User not found'}), 404
+        
+        # Convert to dict if SQLite
+        if use_sqlite:
+            from database.database import dict_from_row
+            user = dict_from_row(row)
+        else:
+            user = row
         
         return jsonify({'user': user}), 200
         

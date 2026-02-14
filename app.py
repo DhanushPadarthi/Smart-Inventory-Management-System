@@ -1,15 +1,16 @@
 """
 Smart Inventory Management System - Main Application
 """
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import Config
 from database.database import get_db_connection, init_db
 from backend.auth import register_user, login_user, get_current_user, refresh_token
+import os
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend', static_url_path='')
 app.config.from_object(Config)
 
 # Initialize extensions
@@ -25,6 +26,19 @@ def get_db():
     if db is None:
         db = get_db_connection()
     return db
+
+# Serve frontend files
+@app.route('/')
+def index():
+    """Serve login page"""
+    return send_from_directory('frontend', 'login.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files"""
+    if os.path.exists(os.path.join('frontend', path)):
+        return send_from_directory('frontend', path)
+    return send_from_directory('frontend', 'login.html')
 
 # Authentication Routes
 @app.route('/api/auth/register', methods=['POST'])
@@ -52,22 +66,6 @@ def health():
     """Health check endpoint"""
     return {'status': 'ok', 'message': 'Server is running'}, 200
 
-@app.route('/')
-def index():
-    """Root endpoint"""
-    return {
-        'message': 'Smart Inventory Management System API',
-        'version': '1.0.0',
-        'endpoints': {
-            'auth': {
-                'register': '/api/auth/register [POST]',
-                'login': '/api/auth/login [POST]',
-                'me': '/api/auth/me [GET]',
-                'refresh': '/api/auth/refresh [POST]'
-            }
-        }
-    }, 200
-
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
@@ -82,8 +80,9 @@ if __name__ == '__main__':
     print("Starting Smart Inventory Management System...")
     print("Initializing database...")
     
-    # Uncomment the line below to initialize database on first run
-    # init_db()
+    # Initialize database
+    init_db()
     
     print("Server starting on http://localhost:5000")
+    print("Open http://localhost:5000 in your browser")
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -1,211 +1,126 @@
-# Smart Inventory Management System
+# 🏢 Smart Inventory Management System
 
-A comprehensive web-based inventory management system built with Flask and SQLite to help businesses track products, manage stock levels, process orders, and generate insightful reports.
+A comprehensive inventory management system for small businesses with user authentication, role-based access control, and real-time inventory tracking.
 
-## 🎯 Features
-
-- **User Authentication**: Secure login and registration system
-- **Product Management**: Add, edit, delete, and search products
-- **Inventory Tracking**: Real-time stock level monitoring
-- **Low Stock Alerts**: Automatic notifications for low inventory
-- **Order Management**: Create and track customer orders
-- **Supplier Management**: Maintain supplier information and contacts
-- **Reports & Analytics**: Sales reports, inventory summaries, and performance metrics
-- **Dashboard**: Visual overview of key metrics and statistics
-
-## 🛠️ Tech Stack
-
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Backend**: Python 3.8+, Flask
-- **Database**: SQLite
-- **Version Control**: Git
-
-## 📁 Project Structure
-
-```
-Smart Inventory Management System/
-├── app.py                          # Flask application entry point
-├── config.py                       # Configuration settings
-├── requirements.txt                # Python dependencies
-├── .env.example                    # Environment variables template
-├── .gitignore                      # Git ignore rules
-├── README.md                       # Project documentation
-├── PRD.md                         # Product requirements
-├── TEAM_ASSESSMENT.md             # Team assignments
-│
-├── backend/                        # Backend Python modules
-│   ├── __init__.py                # Package initialization
-│   ├── routes.py                  # API route definitions
-│   ├── models.py                  # Database models
-│   ├── auth.py                    # Authentication logic
-│   ├── inventory.py               # Inventory management
-│   ├── reports.py                 # Reports generation
-│   └── utils.py                   # Helper utilities
-│
-├── database/                       # Database files
-│   ├── database.py                # Database connection
-│   ├── schema.sql                 # Database schema
-│   └── seed_data.sql              # Sample data
-│
-├── frontend/                       # Frontend files
-│   ├── index.html                 # Landing page
-│   ├── login.html                 # Login page
-│   ├── dashboard.html             # Dashboard
-│   ├── inventory.html             # Inventory page
-│   ├── reports.html               # Reports page
-│   │
-│   ├── css/                       # Stylesheets
-│   │   ├── style.css
-│   │   ├── dashboard.css
-│   │   ├── inventory.css
-│   │   └── reports.css
-│   │
-│   └── js/                        # JavaScript files
-│       ├── main.js
-│       ├── auth.js
-│       ├── dashboard.js
-│       ├── inventory.js
-│       ├── reports.js
-│       └── utils.js
-│
-├── static/                         # Static assets
-│   └── images/
-│
-└── tests/                          # Test files
-    ├── test_backend.py
-    └── test_database.py
-```
-
-## 🚀 Installation
+## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8 or higher
-- Git
-- pip (Python package manager)
+- Python 3.8+
+- Web Browser
 
-### Setup Steps
+### Installation & Setup
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/DhanushPadarthi/Smart-Inventory-Management-System.git
 cd "Smart Inventory Management System"
 ```
 
 2. **Create virtual environment**
 ```bash
 python -m venv venv
+venv\Scripts\activate  # Windows
 ```
 
-3. **Activate virtual environment**
-```bash
-# Windows
-venv\Scripts\activate
-
-# Mac/Linux
-source venv/bin/activate
-```
-
-4. **Install dependencies**
+3. **Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-5. **Set up environment variables**
-```bash
-# Copy the example file
-copy .env.example .env  # Windows
-cp .env.example .env    # Mac/Linux
-
-# Edit .env and add your configuration
-```
-
-6. **Initialize database**
-```bash
-python -c "from database.database import init_db; init_db()"
-```
-
-7. **Run the application**
+4. **Run the application**
 ```bash
 python app.py
 ```
 
-8. **Access the application**
-- Open your browser and navigate to: `http://localhost:5000`
+5. **Open in browser**
+```
+http://localhost:5000
+```
 
-## 📖 Usage
+### Default Login Credentials
+- **Username**: `admin`
+- **Password**: `Admin@123`
 
-### For Users
+## 📁 Project Structure
 
-1. **Registration**: Create a new account on the registration page
-2. **Login**: Login with your credentials
-3. **Dashboard**: View overview of inventory statistics
-4. **Manage Products**: Add, edit, or delete products from inventory
-5. **Track Orders**: Create and monitor customer orders
-6. **View Reports**: Generate and export various reports
-7. **Manage Suppliers**: Add and manage supplier information
+```
+Smart Inventory Management System/
+├── backend/              # Backend logic (authentication, inventory, reports)
+├── database/            # Database schema and connection utilities
+├── frontend/            # HTML/CSS/JS frontend files
+│   ├── css/            # Stylesheets
+│   ├── js/             # JavaScript files
+│   └── *.html          # HTML pages
+├── tests/              # Test files
+├── docs/               # Documentation
+│   ├── README.md       # Detailed setup guide
+│   ├── PRD.md          # Product Requirements Document
+│   ├── SETUP_GUIDE.md  # Complete installation guide
+│   └── API_DOCUMENTATION.md
+├── app.py              # Main Flask application
+├── config.py           # Configuration settings
+├── requirements.txt    # Python dependencies
+└── .env.example        # Environment variables template
+```
 
-### For Developers
+## ✨ Features
 
-See [TEAM_ASSESSMENT.md](TEAM_ASSESSMENT.md) for detailed team assignments and development guidelines.
+### ✅ Milestone 1 - Complete (Weeks 1-2)
+- **User Authentication**: JWT-based login and registration
+- **Role Management**: Admin and Employee roles
+- **Password Security**: Bcrypt hashing
+- **Session Management**: Token-based authentication
 
-## 🔗 API Endpoints
+### 🚧 Upcoming Milestones
+- **Milestone 2** (Weeks 3-4): Product & Inventory Management
+- **Milestone 3** (Week 5): Low-Stock Alerts
+- **Milestone 4** (Weeks 6-7): Transaction Management
+- **Milestone 5** (Week 8): Reports & Export
 
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
+## 🛠️ Technology Stack
 
-### Products
-- `GET /api/products` - Get all products
-- `POST /api/products` - Add new product
-- `GET /api/products/<id>` - Get single product
-- `PUT /api/products/<id>` - Update product
-- `DELETE /api/products/<id>` - Delete product
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
+- **Backend**: Python Flask
+- **Database**: SQLite (Development) / MySQL (Production)
+- **Authentication**: JWT (JSON Web Tokens)
+- **Security**: Bcrypt password hashing
 
-### Orders
-- `GET /api/orders` - Get all orders
-- `POST /api/orders` - Create new order
-- `PUT /api/orders/<id>` - Update order status
+## 📖 Documentation
 
-### Reports
-- `GET /api/reports/sales` - Sales report
-- `GET /api/reports/inventory` - Inventory summary
-- `GET /api/reports/dashboard` - Dashboard statistics
+Detailed documentation is available in the `docs/` folder:
+- [Setup Guide](docs/SETUP_GUIDE.md) - Complete installation instructions
+- [Product Requirements](docs/PRD.md) - Full PRD with all milestones
+- [API Documentation](docs/API_DOCUMENTATION.md) - API endpoints reference
+- [Git Workflow](docs/GIT_WORKFLOW.md) - Contribution guidelines
 
-## 👥 Team
+## 🔐 Security Features
 
-- **Dhanush** - Project Lead & Backend (Core & Authentication)
-- **Tharun** - Backend & Database (Inventory & Products)
-- **Mageswari** - Backend & Database (Reports & Analytics)
-- **Indra** - Backend & Database (Orders & Suppliers)
-- **Akash** - Frontend (Dashboard & Inventory UI)
-- **Kazi** - Frontend (Authentication & Reports UI)
-- **Punyashree** - Frontend (Orders & Suppliers UI)
-
-See [TEAM_ASSESSMENT.md](TEAM_ASSESSMENT.md) for detailed responsibilities.
+- JWT-based authentication with 24-hour token expiry
+- Bcrypt password hashing
+- Role-based access control (RBAC)
+- Input validation and sanitization
+- SQL injection prevention
 
 ## 🧪 Testing
 
-Run the backend tests:
+Run tests:
 ```bash
-pytest tests/
+python -m pytest tests/
 ```
 
 ## 📝 License
 
-This project is created for educational purposes.
+This project is part of academic coursework.
 
-## 🤝 Contributing
+## 👥 Contributors
 
-1. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-2. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-3. Push to the branch (`git push origin feature/AmazingFeature`)
-4. Open a Pull Request
+- Project Team
 
 ## 📞 Support
 
-For support and questions, please contact the team lead.
+For issues or questions, please create an issue in the GitHub repository.
 
 ---
 
-**Built with ❤️ by Team Dhanush**
+**Last Updated**: February 14, 2026  
+**Current Milestone**: 1 - Authentication & Role Management ✅ Complete

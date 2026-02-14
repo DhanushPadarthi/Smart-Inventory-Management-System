@@ -13,6 +13,10 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
     # Database configuration
+    USE_SQLITE = os.environ.get('USE_SQLITE', 'True').lower() == 'true'
+    SQLITE_DB_PATH = os.environ.get('SQLITE_DB_PATH') or 'inventory.db'
+    
+    # MySQL configuration (if USE_SQLITE is False)
     DB_HOST = os.environ.get('DB_HOST') or 'localhost'
     DB_USER = os.environ.get('DB_USER') or 'root'
     DB_PASSWORD = os.environ.get('DB_PASSWORD') or ''

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🏢 Smart Inventory Management System</h1>
+            <button id="logout-btn" class="btn-logout">Logout</button>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="welcome-card">
+                <h2>Welcome, <span id="user-name"></span>!</h2>
+                <div class="user-info">
+                    <div class="info-item">
+                        <span class="label">Username:</span>
+                        <span class="value" id="user-username"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Email:</span>
+                        <span class="value" id="user-email"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Role:</span>
+                        <span class="badge" id="user-role"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card disabled">
+                    <div class="icon">📦</div>
+                    <h3>Products</h3>
+                    <p>Manage your inventory</p>
+                    <small>Coming Soon</small>
+                </div>
+
+                <div class="feature-card disabled">
+                    <div class="icon">📊</div>
+                    <h3>Reports</h3>
+                    <p>View sales reports</p>
+                    <small>Coming Soon</small>
+                </div>
+
+                <div class="feature-card disabled">
+                    <div class="icon">🔔</div>
+                    <h3>Alerts</h3>
+                    <p>Low stock notifications</p>
+                    <small>Coming Soon</small>
+                </div>
+
+                <div class="feature-card disabled">
+                    <div class="icon">📝</div>
+                    <h3>Transactions</h3>
+                    <p>Track movements</p>
+                    <small>Coming Soon</small>
+                </div>
+            </div>
+
+            <div class="info-banner">
+                <h3>✅ Authentication System Active</h3>
+                <p>User registration and login functionality is now complete!</p>
+                <p class="small-text">
+                    This is Milestone 1 (Weeks 1-2) - Authentication and Role-Based Access Control
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
