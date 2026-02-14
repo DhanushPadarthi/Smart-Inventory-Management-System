@@ -8,11 +8,11 @@ if (document.getElementById('login-form')) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         
-        if (!username || !password) {
-            showError('Please enter both username and password');
+        if (!email || !password) {
+            showError('Please enter both email and password');
             return;
         }
         
@@ -23,7 +23,7 @@ if (document.getElementById('login-form')) {
         
         try {
             const data = await apiCall('/auth/login', 'POST', {
-                username: username,
+                email: email,
                 password: password
             });
             

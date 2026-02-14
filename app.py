@@ -6,7 +6,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from backend.config import Config
 from database.database import get_db_connection, init_db
-from backend.auth import register_user, login_user, get_current_user, refresh_token
+from backend.auth import register_user, login_user, get_current_user, refresh_token, change_user_role
 import os
 
 # Initialize Flask app
@@ -60,6 +60,11 @@ def me():
 def refresh():
     """Refresh access token"""
     return refresh_token()
+
+@app.route('/api/auth/change-role', methods=['PUT'])
+def change_role():
+    """Change user role (Admin only)"""
+    return change_user_role(get_db())
 
 @app.route('/api/health', methods=['GET'])
 def health():

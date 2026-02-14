@@ -161,10 +161,10 @@ def login_user(db_connection):
         data = request.get_json()
         
         # Validate required fields
-        if not data.get('username') or not data.get('password'):
-            return jsonify({'error': 'Username and password are required'}), 400
+        if not data.get('email') or not data.get('password'):
+            return jsonify({'error': 'Email and password are required'}), 400
         
-        username = data['username'].strip()
+        email = data['email'].strip().lower()
         password = data['password']
         
         # Check if using SQLite or MySQL
@@ -173,26 +173,26 @@ def login_user(db_connection):
         
         cursor = db_connection.cursor()
         
-        # Get user by username
+        # Get user by email
         if use_sqlite:
             query = """
                 SELECT user_id, username, email, password_hash, role, first_name, last_name, is_active
                 FROM users
-                WHERE username = ?
+                WHERE email = ?
             """
         else:
             query = """
                 SELECT user_id, username, email, password_hash, role, first_name, last_name, is_active
                 FROM users
-                WHERE username = %s
+                WHERE email = %s
             """
         
-        cursor.execute(query, (username,))
+        cursor.execute(query, (email,))
         row = cursor.fetchone()
         
         if not row:
             cursor.close()
-            return jsonify({'error': 'Invalid username or password'}), 401
+            return jsonify({'error': 'Invalid email or password'}), 401
         
         # Convert to dict if SQLite
         if use_sqlite:
@@ -307,3 +307,91 @@ def refresh_token():
         
     except Exception as e:
         return jsonify({'error': f'Token refresh failed: {str(e)}'}), 500
+
+def change_user_role(db_connection):
+    """Change user role (Admin only)"""
+    try:
+        # Get current user from JWT
+        identity = get_jwt_identity()
+        current_user_role = identity.get('role')
+        
+        # Only admins can change roles
+        if current_user_role != 'admin':
+            return jsonify({'error': 'Unauthorized. Admin access required'}), 403
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('user_id') or not data.get('new_role'):
+            return jsonify({'error': 'user_id and new_role are required'}), 400
+        
+        user_id = data['user_id']
+        new_role = data['new_role'].lower()
+        
+        # Validate role
+        if new_role not in ['admin', 'employee']:
+            return jsonify({'error': 'Role must be either admin or employee'}), 400
+        
+        # Check if using SQLite or MySQL
+        from backend.config import Config
+        use_sqlite = Config.USE_SQLITE
+        
+        cursor = db_connection.cursor()
+        
+        # Check if user exists
+        if use_sqlite:
+            cursor.execute("SELECT user_id, username, email, role FROM users WHERE user_id = ?", (user_id,))
+        else:
+            cursor.execute("SELECT user_id, username, email, role FROM users WHERE user_id = %s", (user_id,))
+        
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.close()
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Convert to dict if SQLite
+        if use_sqlite:
+            from database.database import dict_from_row
+            user = dict_from_row(row)
+        else:
+            user = {
+                'user_id': row[0],
+                'username': row[1],
+                'email': row[2],
+                'role': row[3]
+            }
+        
+        # Prevent changing own role
+        if user['user_id'] == identity.get('user_id'):
+            cursor.close()
+            return jsonify({'error': 'Cannot change your own role'}), 400
+        
+        # Update user role
+        if use_sqlite:
+            cursor.execute(
+                "UPDATE users SET role = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?",
+                (new_role, user_id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE users SET role = %s, updated_at = CURRENT_TIMESTAMP WHERE user_id = %s",
+                (new_role, user_id)
+            )
+        
+        db_connection.commit()
+        cursor.close()
+        
+        return jsonify({
+            'message': f'User role updated successfully from {user["role"]} to {new_role}',
+            'user': {
+                'user_id': user['user_id'],
+                'username': user['username'],
+                'email': user['email'],
+                'old_role': user['role'],
+                'new_role': new_role
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Role change failed: {str(e)}'}), 500
