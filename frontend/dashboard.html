@@ -11,7 +11,10 @@
     <div class="dashboard-container">
         <div class="dashboard-header">
             <h1>🏢 Smart Inventory Management System</h1>
-            <button id="logout-btn" class="btn-logout">Logout</button>
+            <div class="header-actions">
+                <a href="profile.html" class="btn-secondary">👤 Profile</a>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
         </div>
 
         <div class="dashboard-content">
@@ -34,19 +37,17 @@
             </div>
 
             <div class="features-grid">
-                <div class="feature-card disabled">
+                <a href="inventory.html" class="feature-card">
                     <div class="icon">📦</div>
                     <h3>Products</h3>
                     <p>Manage your inventory</p>
-                    <small>Coming Soon</small>
-                </div>
+                </a>
 
-                <div class="feature-card disabled">
+                <a href="reports.html" class="feature-card">
                     <div class="icon">📊</div>
                     <h3>Reports</h3>
                     <p>View sales reports</p>
-                    <small>Coming Soon</small>
-                </div>
+                </a>
 
                 <div class="feature-card disabled">
                     <div class="icon">🔔</div>
@@ -64,10 +65,10 @@
             </div>
 
             <div class="info-banner">
-                <h3>✅ Authentication System Active</h3>
-                <p>User registration and login functionality is now complete!</p>
+                <h3>✅ Milestone 2 Complete: Product Management</h3>
+                <p><strong id="role-info"></strong></p>
                 <p class="small-text">
-                    This is Milestone 1 (Weeks 1-2) - Authentication and Role-Based Access Control
+                    Password reset available in Profile • Products and Reports fully functional
                 </p>
             </div>
         </div>

@@ -13,6 +13,14 @@ if (user) {
     const roleBadge = document.getElementById('user-role');
     roleBadge.textContent = user.role.toUpperCase();
     roleBadge.classList.add(user.role);
+    
+    // Display role-specific information
+    const roleInfo = document.getElementById('role-info');
+    if (user.role === 'admin') {
+        roleInfo.textContent = 'Admin Access: Full control over inventory - create, edit, delete products, manage stock, and view all reports.';
+    } else {
+        roleInfo.textContent = 'Client Access: View product catalog and reports. Contact admin for inventory changes.';
+    }
 }
 
 // Logout button

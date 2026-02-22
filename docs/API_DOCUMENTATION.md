@@ -12,11 +12,10 @@ Most endpoints require authentication. After logging in, you'll receive a sessio
 
 ## 📋 Table of Contents
 1. [Authentication](#authentication-endpoints)
-2. [Products](#products-endpoints)
-3. [Inventory](#inventory-endpoints)
-4. [Orders](#orders-endpoints)
-5. [Suppliers](#suppliers-endpoints)
-6. [Reports](#reports-endpoints)
+2. [Products & Inventory](#products-endpoints)
+3. [Stock Management](#stock-management-endpoints)
+4. [Categories & Suppliers](#categories-suppliers-endpoints)
+5. [Reports](#reports-endpoints) (Coming Soon)
 
 ---
 
@@ -117,6 +116,40 @@ Cookie: session=<session-id>
 
 ---
 
+### Change Password
+Change the current user's password.
+
+**Endpoint:** `PUT /api/auth/change-password`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Request Body:**
+```json
+{
+  "current_password": "OldPass@123",
+  "new_password": "NewPass@456"
+}
+```
+
+**Response (Success - 200):**
+```json
+{
+  "message": "Password changed successfully"
+}
+```
+
+**Response (Error - 401):**
+```json
+{
+  "error": "Current password is incorrect"
+}
+```
+
+---
+
 ### Get Current User
 Gets information about the currently authenticated user.
 
@@ -202,6 +235,352 @@ Authorization: Bearer <access-token>
 - Valid roles: `admin`, `employee`
 
 ---
+
+## 📦 Products & Inventory Endpoints
+
+### Get All Products
+Retrieves all products with optional filtering.
+
+**Endpoint:** `GET /api/products`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Query Parameters:**
+- `category` (optional): Filter by category
+- `supplier` (optional): Filter by supplier
+- `low_stock` (optional): 'true' to show only low stock items
+- `search` (optional): Search by product name or SKU
+
+**Example:**
+```
+GET /api/products?category=Electronics&low_stock=true&search=laptop
+```
+
+**Response (Success - 200):**
+```json
+{
+  "products": [
+    {
+      "product_id": 1,
+      "sku": "PROD-001",
+      "product_name": "Laptop Dell XPS 15",
+      "description": "15-inch laptop with 16GB RAM",
+      "category": "Electronics",
+      "supplier": "TechSupply Inc",
+      "unit_price": 1299.99,
+      "quantity_in_stock": 5,
+      "min_stock_level": 10,
+      "unit_of_measure": "units",
+      "is_active": true,
+      "is_low_stock": true,
+      "created_at": "2026-02-22T10:00:00",
+      "updated_at": "2026-02-22T10:00:00"
+    }
+  ],
+  "total": 1
+}
+```
+
+---
+
+### Get Single Product
+Retrieves details of a specific product.
+
+**Endpoint:** `GET /api/products/<product_id>`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "product": {
+    "product_id": 1,
+    "sku": "PROD-001",
+    "product_name": "Laptop Dell XPS 15",
+    "description": "15-inch laptop with 16GB RAM",
+    "category": "Electronics",
+    "supplier": "TechSupply Inc",
+    "unit_price": 1299.99,
+    "quantity_in_stock": 5,
+    "min_stock_level": 10,
+    "unit_of_measure": "units",
+    "is_active": true,
+    "is_low_stock": true,
+    "created_at": "2026-02-22T10:00:00",
+    "updated_at": "2026-02-22T10:00:00"
+  }
+}
+```
+
+**Response (Error - 404):**
+```json
+{
+  "error": "Product not found"
+}
+```
+
+---
+
+### Create Product
+Creates a new product in the inventory.
+
+**Endpoint:** `POST /api/products`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "sku": "PROD-001",
+  "product_name": "Laptop Dell XPS 15",
+  "description": "15-inch laptop with 16GB RAM",
+  "category": "Electronics",
+  "supplier": "TechSupply Inc",
+  "unit_price": 1299.99,
+  "quantity_in_stock": 10,
+  "min_stock_level": 5,
+  "unit_of_measure": "units"
+}
+```
+
+**Response (Success - 201):**
+```json
+{
+  "message": "Product created successfully",
+  "product": {
+    "product_id": 1,
+    "sku": "PROD-001",
+    "product_name": "Laptop Dell XPS 15",
+    "category": "Electronics",
+    "supplier": "TechSupply Inc",
+    "unit_price": 1299.99,
+    "quantity_in_stock": 10,
+    "min_stock_level": 5
+  }
+}
+```
+
+**Response (Error - 400):**
+```json
+{
+  "error": "Product with SKU PROD-001 already exists"
+}
+```
+
+**Notes:**
+- SKU must be unique and can only contain letters, numbers, hyphens, and underscores
+- All required fields: sku, product_name, category, supplier, unit_price
+- Initial quantity_in_stock defaults to 0 if not provided
+- Automatically creates a stock movement record if initial quantity > 0
+
+---
+
+### Update Product
+Updates product details (excludes stock quantity).
+
+**Endpoint:** `PUT /api/products/<product_id>`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "product_name": "Laptop Dell XPS 15 Pro",
+  "description": "Updated description",
+  "unit_price": 1499.99,
+  "min_stock_level": 8
+}
+```
+
+**Response (Success - 200):**
+```json
+{
+  "message": "Product updated successfully"
+}
+```
+
+**Notes:**
+- Use `/api/products/<product_id>/stock` endpoint to update stock quantity
+- Updateable fields: product_name, description, category, supplier, unit_price, min_stock_level, unit_of_measure
+
+---
+
+### Delete Product
+Soft deletes a product (admin only).
+
+**Endpoint:** `DELETE /api/products/<product_id>`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "message": "Product deleted successfully"
+}
+```
+
+**Response (Error - 403):**
+```json
+{
+  "error": "Unauthorized. Admin access required"
+}
+```
+
+**Notes:**
+- Only admins can delete products
+- This is a soft delete - product is marked as inactive but not removed from database
+
+---
+
+## 📊 Stock Management Endpoints
+
+### Update Product Stock
+Updates stock quantity with movement tracking.
+
+**Endpoint:** `PUT /api/products/<product_id>/stock`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "movement_type": "stock-in",
+  "quantity": 20,
+  "reference_number": "PO-12345",
+  "notes": "Received from supplier"
+}
+```
+
+**Response (Success - 200):**
+```json
+{
+  "message": "Stock updated successfully",
+  "movement": {
+    "movement_type": "stock-in",
+    "quantity": 20,
+    "previous_quantity": 5,
+    "new_quantity": 25
+  }
+}
+```
+
+**Movement Types:**
+- `stock-in`: Receive inventory (purchase, returns)
+- `stock-out`: Reduce inventory (sales, damage, use)
+- `adjustment`: Manual correction
+
+**Response (Error - 400):**
+```json
+{
+  "error": "Insufficient stock. Cannot reduce stock below 0"
+}
+```
+
+---
+
+### Get Stock Movement History
+Retrieves stock movement history for a product.
+
+**Endpoint:** `GET /api/products/<product_id>/movements`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "movements": [
+    {
+      "movement_id": 1,
+      "product_id": 1,
+      "movement_type": "stock-in",
+      "quantity": 20,
+      "previous_quantity": 5,
+      "new_quantity": 25,
+      "reference_number": "PO-12345",
+      "notes": "Received from supplier",
+      "created_at": "2026-02-22T10:00:00",
+      "created_by": 1
+    }
+  ],
+  "total": 1
+}
+```
+
+---
+
+## 🏷️ Categories & Suppliers Endpoints
+
+### Get All Categories
+Retrieves all unique product categories.
+
+**Endpoint:** `GET /api/categories`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "categories": [
+    "Electronics",
+    "Office Supplies",
+    "Furniture"
+  ]
+}
+```
+
+---
+
+### Get All Suppliers
+Retrieves all unique suppliers.
+
+**Endpoint:** `GET /api/suppliers`
+
+**Headers:**
+```
+Authorization: Bearer <access-token>
+```
+
+**Response (Success - 200):**
+```json
+{
+  "suppliers": [
+    "TechSupply Inc",
+    "Office World",
+    "Furniture Plus"
+  ]
+}
+```
+
+---
+
+**Notes:**
 
 ### Refresh Token
 Refreshes the access token.

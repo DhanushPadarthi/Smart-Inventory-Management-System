@@ -72,7 +72,72 @@ def init_db():
                 1
             ))
             
+            # Create products table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS products (
+                    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    sku TEXT UNIQUE NOT NULL,
+                    product_name TEXT NOT NULL,
+                    description TEXT,
+                    category TEXT,
+                    supplier TEXT,
+                    unit_price REAL NOT NULL,
+                    quantity_in_stock INTEGER NOT NULL DEFAULT 0,
+                    min_stock_level INTEGER DEFAULT 10,
+                    unit_of_measure TEXT DEFAULT 'units',
+                    is_active INTEGER DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_by INTEGER,
+                    updated_by INTEGER,
+                    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL,
+                    FOREIGN KEY (updated_by) REFERENCES users(user_id) ON DELETE SET NULL
+                )
+            """)
+            
+            # Create stock movements table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS stock_movements (
+                    movement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    product_id INTEGER NOT NULL,
+                    movement_type TEXT NOT NULL,
+                    quantity INTEGER NOT NULL,
+                    previous_quantity INTEGER NOT NULL,
+                    new_quantity INTEGER NOT NULL,
+                    reference_number TEXT,
+                    notes TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    created_by INTEGER,
+                    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+                    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL
+                )
+            """)
+            
+            # Create categories table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS categories (
+                    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    category_name TEXT UNIQUE NOT NULL,
+                    description TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Create suppliers table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS suppliers (
+                    supplier_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    supplier_name TEXT UNIQUE NOT NULL,
+                    contact_person TEXT,
+                    email TEXT,
+                    phone TEXT,
+                    address TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
             connection.commit()
+
             cursor.close()
             connection.close()
             

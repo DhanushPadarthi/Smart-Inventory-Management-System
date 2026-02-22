@@ -47,10 +47,31 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     
     try {
         const response = await fetch(API_URL + endpoint, config);
+        
+        // Handle 401 Unauthorized - token invalid or expired
+        if (response.status === 401) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+            throw new Error('Session expired. Please login again.');
+        }
+        
+        // Handle 422 Unprocessable Entity - invalid token format
+        if (response.status === 422) {
+            const data = await response.json();
+            // If JWT error, clear tokens and redirect to login
+            if (data.msg && (data.msg.includes('Subject') || data.msg.includes('segments') || data.msg.includes('Authorization'))) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+                throw new Error('Invalid session. Please login again.');
+            }
+        }
+        
         const data = await response.json();
         
         if (!response.ok) {
-            throw new Error(data.error || 'Request failed');
+            throw new Error(data.error || data.msg || 'Request failed');
         }
         
         return data;

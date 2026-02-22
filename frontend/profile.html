@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🏢 Smart Inventory Management System</h1>
+            <div class="header-actions">
+                <a href="dashboard.html" class="btn-secondary">← Back to Dashboard</a>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="profile-container">
+                <div class="profile-section">
+                    <h2>👤 Profile Information</h2>
+                    <div class="profile-info">
+                        <div class="info-row">
+                            <span class="label">Full Name:</span>
+                            <span class="value" id="user-fullname"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Username:</span>
+                            <span class="value" id="user-username"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Email:</span>
+                            <span class="value" id="user-email"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Phone:</span>
+                            <span class="value" id="user-phone"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Role:</span>
+                            <span class="badge" id="user-role"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Member Since:</span>
+                            <span class="value" id="user-created"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h2>🔒 Change Password</h2>
+                    
+                    <div id="password-error" class="error-message" style="display: none;"></div>
+                    <div id="password-success" class="success-message" style="display: none;"></div>
+
+                    <form id="change-password-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="current-password">Current Password *</label>
+                            <input type="password" id="current-password" name="current_password" required 
+                                   placeholder="Enter current password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-password">New Password *</label>
+                            <input type="password" id="new-password" name="new_password" required 
+                                   placeholder="Enter new password">
+                            <small class="form-help">
+                                Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm-new-password">Confirm New Password *</label>
+                            <input type="password" id="confirm-new-password" name="confirm_password" required 
+                                   placeholder="Confirm new password">
+                        </div>
+
+                        <button type="submit" class="btn-primary">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

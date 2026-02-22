@@ -3,10 +3,13 @@ Smart Inventory Management System - Main Application
 """
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, jwt_required
 from backend.config import Config
 from database.database import get_db_connection, init_db
-from backend.auth import register_user, login_user, get_current_user, refresh_token, change_user_role
+from backend.auth import register_user, login_user, get_current_user, refresh_token, change_user_role, change_password
+from backend.inventory import (create_product, get_all_products, get_product, update_product, 
+                               delete_product, update_stock, get_stock_movements, 
+                               get_categories, get_suppliers)
 import os
 
 # Initialize Flask app
@@ -52,6 +55,7 @@ def login():
     return login_user(get_db())
 
 @app.route('/api/auth/me', methods=['GET'])
+@jwt_required()
 def me():
     """Get current user"""
     return get_current_user(get_db())
@@ -62,9 +66,71 @@ def refresh():
     return refresh_token()
 
 @app.route('/api/auth/change-role', methods=['PUT'])
+@jwt_required()
 def change_role():
     """Change user role (Admin only)"""
     return change_user_role(get_db())
+
+@app.route('/api/auth/change-password', methods=['PUT'])
+@jwt_required()
+def password_change():
+    """Change user password"""
+    return change_password(get_db())
+
+# Product/Inventory Routes - Milestone 2
+@app.route('/api/products', methods=['GET'])
+@jwt_required()
+def products_list():
+    """Get all products"""
+    return get_all_products(get_db())
+
+@app.route('/api/products', methods=['POST'])
+@jwt_required()
+def products_create():
+    """Create a new product"""
+    return create_product(get_db())
+
+@app.route('/api/products/<int:product_id>', methods=['GET'])
+@jwt_required()
+def products_get(product_id):
+    """Get a single product"""
+    return get_product(get_db(), product_id)
+
+@app.route('/api/products/<int:product_id>', methods=['PUT'])
+@jwt_required()
+def products_update(product_id):
+    """Update a product"""
+    return update_product(get_db(), product_id)
+
+@app.route('/api/products/<int:product_id>', methods=['DELETE'])
+@jwt_required()
+def products_delete(product_id):
+    """Delete a product"""
+    return delete_product(get_db(), product_id)
+
+@app.route('/api/products/<int:product_id>/stock', methods=['PUT'])
+@jwt_required()
+def products_stock_update(product_id):
+    """Update product stock"""
+    return update_stock(get_db(), product_id)
+
+@app.route('/api/products/<int:product_id>/movements', methods=['GET'])
+@jwt_required()
+def products_movements(product_id):
+    """Get stock movements for a product"""
+    return get_stock_movements(get_db(), product_id)
+
+@app.route('/api/categories', methods=['GET'])
+@jwt_required()
+def categories_list():
+    """Get all categories"""
+    return get_categories(get_db())
+
+@app.route('/api/suppliers', methods=['GET'])
+@jwt_required()
+def suppliers_list():
+    """Get all suppliers"""
+    return get_suppliers(get_db())
 
 @app.route('/api/health', methods=['GET'])
 def health():

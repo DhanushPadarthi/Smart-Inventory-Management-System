@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Reset - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .reset-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .reset-container h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .reset-container p {
+            margin: 15px 0;
+            line-height: 1.6;
+            color: #666;
+        }
+        .reset-container .success {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .reset-container .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        .reset-container .btn:hover {
+            transform: translateY(-2px);
+        }
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="reset-container">
+        <h1>🔐 Authentication System Updated</h1>
+        <p>We've enhanced the security of our authentication system.</p>
+        
+        <div class="info-box">
+            <h3>What's New:</h3>
+            <ul>
+                <li>✅ Improved JWT token security</li>
+                <li>✅ Enhanced session validation</li>
+                <li>✅ Automatic invalid token detection</li>
+                <li>✅ Role-based access control</li>
+            </ul>
+        </div>
+
+        <div id="status-message"></div>
+
+        <p>Your old session has been cleared. Please login again to continue.</p>
+        
+        <div class="info-box">
+            <h3>Role-Based Permissions:</h3>
+            <ul>
+                <li><strong>Admin:</strong> Full access - Create, edit, delete products, manage stock, view all reports</li>
+                <li><strong>Client:</strong> View product catalog and reports only</li>
+            </ul>
+        </div>
+
+        <a href="login.html" class="btn">Go to Login →</a>
+    </div>
+
+    <script>
+        // Clear all stored tokens and user data
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
+        
+        // Show success message
+        document.getElementById('status-message').innerHTML = 
+            '<p class="success">✓ Session cleared successfully!</p>';
+    </script>
+</body>
+</html>

@@ -58,7 +58,7 @@ def register_user(db_connection):
                 return jsonify({'error': f'{field} is required'}), 400
         
         username = data['username'].strip()
-        email = data['email'].strip().lower()
+        email = data['email'].strip().lower()   
         password = data['password']
         role = data['role'].lower()
         first_name = data['first_name'].strip()
@@ -66,8 +66,8 @@ def register_user(db_connection):
         phone = data.get('phone', '').strip()
         
         # Validate role
-        if role not in ['admin', 'employee']:
-            return jsonify({'error': 'Role must be either admin or employee'}), 400
+        if role not in ['admin', 'client']:
+            return jsonify({'error': 'Role must be either admin or client'}), 400
         
         # Validate email format
         if not validate_email(email):
@@ -222,15 +222,9 @@ def login_user(db_connection):
         db_connection.commit()
         cursor.close()
         
-        # Create JWT tokens
-        identity = {
-            'user_id': user['user_id'],
-            'username': user['username'],
-            'role': user['role']
-        }
-        
-        access_token = create_access_token(identity=identity)
-        refresh_token = create_refresh_token(identity=identity)
+        # Create JWT tokens with user_id as string identity
+        access_token = create_access_token(identity=str(user['user_id']))
+        refresh_token = create_refresh_token(identity=str(user['user_id']))
         
         return jsonify({
             'message': 'Login successful',
@@ -249,12 +243,10 @@ def login_user(db_connection):
     except Exception as e:
         return jsonify({'error': f'Login failed: {str(e)}'}), 500
 
-@jwt_required()
 def get_current_user(db_connection):
     """Get current logged-in user details"""
     try:
-        identity = get_jwt_identity()
-        user_id = identity['user_id']
+        user_id = int(get_jwt_identity())  # JWT identity is now a string user_id
         
         # Check if using SQLite or MySQL
         from backend.config import Config
@@ -294,7 +286,6 @@ def get_current_user(db_connection):
     except Exception as e:
         return jsonify({'error': f'Failed to get user: {str(e)}'}), 500
 
-@jwt_required(refresh=True)
 def refresh_token():
     """Refresh access token using refresh token"""
     try:
@@ -311,12 +302,31 @@ def refresh_token():
 def change_user_role(db_connection):
     """Change user role (Admin only)"""
     try:
-        # Get current user from JWT
-        identity = get_jwt_identity()
-        current_user_role = identity.get('role')
+        # Get current user ID from JWT
+        current_user_id = int(get_jwt_identity())
+        
+        # Check if using SQLite or MySQL
+        from backend.config import Config
+        use_sqlite = Config.USE_SQLITE
+        
+        cursor = db_connection.cursor()
+        
+        # Get current user's role to verify admin access
+        if use_sqlite:
+            cursor.execute("SELECT role FROM users WHERE user_id = ?", (current_user_id,))
+        else:
+            cursor.execute("SELECT role FROM users WHERE user_id = %s", (current_user_id,))
+        
+        current_user = cursor.fetchone()
+        if not current_user:
+            cursor.close()
+            return jsonify({'error': 'Current user not found'}), 404
+        
+        current_user_role = current_user[0] if isinstance(current_user, tuple) else current_user['role']
         
         # Only admins can change roles
         if current_user_role != 'admin':
+            cursor.close()
             return jsonify({'error': 'Unauthorized. Admin access required'}), 403
         
         data = request.get_json()
@@ -329,8 +339,8 @@ def change_user_role(db_connection):
         new_role = data['new_role'].lower()
         
         # Validate role
-        if new_role not in ['admin', 'employee']:
-            return jsonify({'error': 'Role must be either admin or employee'}), 400
+        if new_role not in ['admin', 'client']:
+            return jsonify({'error': 'Role must be either admin or client'}), 400
         
         # Check if using SQLite or MySQL
         from backend.config import Config
@@ -363,7 +373,7 @@ def change_user_role(db_connection):
             }
         
         # Prevent changing own role
-        if user['user_id'] == identity.get('user_id'):
+        if user['user_id'] == current_user_id:
             cursor.close()
             return jsonify({'error': 'Cannot change your own role'}), 400
         
@@ -395,3 +405,79 @@ def change_user_role(db_connection):
         
     except Exception as e:
         return jsonify({'error': f'Role change failed: {str(e)}'}), 500
+
+def change_password(db_connection):
+    """Change user password"""
+    try:
+        # Get current user ID from JWT
+        user_id = int(get_jwt_identity())
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('current_password') or not data.get('new_password'):
+            return jsonify({'error': 'current_password and new_password are required'}), 400
+        
+        current_password = data['current_password']
+        new_password = data['new_password']
+        
+        # Validate new password strength
+        is_valid, message = validate_password(new_password)
+        if not is_valid:
+            return jsonify({'error': message}), 400
+        
+        # Check if using SQLite or MySQL
+        from backend.config import Config
+        use_sqlite = Config.USE_SQLITE
+        
+        cursor = db_connection.cursor()
+        
+        # Get current user's password hash
+        if use_sqlite:
+            cursor.execute("SELECT password_hash FROM users WHERE user_id = ?", (user_id,))
+        else:
+            cursor.execute("SELECT password_hash FROM users WHERE user_id = %s", (user_id,))
+        
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.close()
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Convert to dict if SQLite
+        if use_sqlite:
+            from database.database import dict_from_row
+            user_data = dict_from_row(row)
+            current_hash = user_data['password_hash']
+        else:
+            current_hash = row[0]
+        
+        # Verify current password
+        if not verify_password(current_password, current_hash):
+            cursor.close()
+            return jsonify({'error': 'Current password is incorrect'}), 401
+        
+        # Hash new password
+        new_password_hash = hash_password(new_password)
+        
+        # Update password
+        if use_sqlite:
+            cursor.execute(
+                "UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?",
+                (new_password_hash, user_id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE users SET password_hash = %s, updated_at = CURRENT_TIMESTAMP WHERE user_id = %s",
+                (new_password_hash, user_id)
+            )
+        
+        db_connection.commit()
+        cursor.close()
+        
+        return jsonify({
+            'message': 'Password changed successfully'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Password change failed: {str(e)}'}), 500

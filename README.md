@@ -70,10 +70,20 @@ Smart Inventory Management System/
 - **Role Management**: Admin and Employee roles
 - **Password Security**: Bcrypt hashing
 - **Session Management**: Token-based authentication
+- **Profile Management**: Password reset functionality
+
+### ✅ Milestone 2 - Complete (Weeks 3-4)
+- **Product Management**: Full CRUD operations for products
+- **SKU Management**: Unique product identification
+- **Stock Tracking**: Real-time inventory levels
+- **Stock Operations**: Stock-in, stock-out, and adjustments
+- **Movement History**: Complete audit trail of stock changes
+- **Categories & Suppliers**: Organized product classification
+- **Search & Filters**: Advanced product search and filtering
+- **Low Stock Detection**: Automatic identification of low stock items
 
 ### 🚧 Upcoming Milestones
-- **Milestone 2** (Weeks 3-4): Product & Inventory Management
-- **Milestone 3** (Week 5): Low-Stock Alerts
+- **Milestone 3** (Week 5): Low-Stock Alerts & Notifications
 - **Milestone 4** (Weeks 6-7): Transaction Management
 - **Milestone 5** (Week 8): Reports & Export
 

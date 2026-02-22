@@ -1,8 +1,22 @@
 # Smart Inventory Management System - Setup Guide
 
-## 🚀 Authentication Module Complete (Milestone 1)
+## 🚀 Milestones Complete
 
-This guide covers the setup and running of the **Registration and Login** functionality for both Admin and Employee users.
+### ✅ Milestone 1: Authentication & Role Management (Weeks 1-2)
+- User registration and login with JWT authentication
+- Role-based access control (Admin/Employee)
+- Password reset in user profile
+- Secure session management
+
+### ✅ Milestone 2: Product & Inventory Management (Weeks 3-4)
+- Complete product CRUD operations
+- Stock level tracking and updates
+- Stock movement history
+- Categories and suppliers management
+- Advanced search and filtering
+- Low stock detection
+
+This guide covers the setup and running of the complete system with authentication and inventory management.
 
 ---
 
@@ -74,40 +88,17 @@ The backend server will start at: **http://localhost:5000**
 
 ---
 
-## 💻 Frontend Setup (React)
-
-### 1. Install Node Dependencies
-
-```bash
-# Navigate to frontend directory
-cd frontend-react
-
-# Install dependencies
-npm install
-```
-
-### 2. Run React Development Server
-
-```bash
-# Start the development server
-npm start
-```
-
-The frontend will open automatically at: **http://localhost:3000**
-
----
-
-## 🔐 Testing the Application
+## � Testing the Application
 
 ### Default Admin Credentials
 
-- **Username**: `admin`
+- **Email**: `admin@inventory.com`
 - **Password**: `Admin@123`
 
 ### Test Flow
 
 1. **Login**: 
-   - Open http://localhost:3000
+   - Open http://localhost:5000
    - Use default admin credentials to login
    - You'll be redirected to the dashboard
 
@@ -126,7 +117,34 @@ The frontend will open automatically at: **http://localhost:3000**
 3. **Dashboard**:
    - View user information
    - See role badge (Admin/Employee)
+   - Navigate to Products, Reports, or Profile
    - Logout functionality
+
+4. **Profile & Password Reset**:
+   - Click "👤 Profile" button in dashboard header
+   - View complete user information
+   - Change password with current password verification
+   - Password must meet strength requirements
+
+5. **Product Management** (New in Milestone 2):
+   - Click "📦 Products" from dashboard
+   - **Add Product**: Click "+ Add Product" button
+     - Enter SKU (unique identifier), name, description
+     - Select category and supplier
+     - Set unit price, initial stock, min stock level
+     - Choose unit of measure
+   - **Search & Filter**: 
+     - Search by product name or SKU
+     - Filter by category or supplier
+     - Show only low stock items checkbox
+   - **Edit Product**: Update product details (except stock)
+   - **Update Stock**: Record inventory movements
+     - Stock-in (purchases/receipts)
+     - Stock-out (sales/usage)
+     - Adjustments (corrections)
+     - Add reference numbers and notes
+   - **View Details**: See full product info and stock movement history
+   - **Delete Product**: Admin-only soft delete
 
 ---
 
@@ -177,6 +195,27 @@ Smart Inventory Management System/
 | POST | `/api/auth/login` | Login user | No |
 | GET | `/api/auth/me` | Get current user | Yes (JWT) |
 | POST | `/api/auth/refresh` | Refresh access token | Yes (Refresh Token) |
+| PUT | `/api/auth/change-role` | Change user role (Admin) | Yes (JWT) |
+| PUT | `/api/auth/change-password` | Change password | Yes (JWT) |
+
+### Product Management Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/products` | Get all products | Yes (JWT) |
+| POST | `/api/products` | Create new product | Yes (JWT) |
+| GET | `/api/products/<id>` | Get single product | Yes (JWT) |
+| PUT | `/api/products/<id>` | Update product | Yes (JWT) |
+| DELETE | `/api/products/<id>` | Delete product (Admin) | Yes (JWT) |
+| PUT | `/api/products/<id>/stock` | Update stock | Yes (JWT) |
+| GET | `/api/products/<id>/movements` | Get stock history | Yes (JWT) |
+
+### Utility Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/categories` | Get all categories | Yes (JWT) |
+| GET | `/api/suppliers` | Get all suppliers | Yes (JWT) |
 | GET | `/api/health` | Health check | No |
 
 ### Request Examples

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/inventory.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🏢 Smart Inventory Management System</h1>
+            <div class="header-actions">
+                <a href="dashboard.html" class="btn-secondary">← Dashboard</a>
+                <a href="profile.html" class="btn-secondary">👤 Profile</a>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h2>📦 Product Management</h2>
+                <button id="add-product-btn" class="btn-primary">+ Add Product</button>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <input type="text" id="search-input" placeholder="🔍 Search by name or SKU..." class="search-input">
+                </div>
+                <div class="filter-group">
+                    <select id="category-filter" class="filter-select">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="supplier-filter" class="filter-select">
+                        <option value="">All Suppliers</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="low-stock-filter">
+                        Low Stock Only
+                    </label>
+                </div>
+                <button id="clear-filters-btn" class="btn-secondary">Clear Filters</button>
+            </div>
+
+            <!-- Products Table -->
+            <div class="table-container">
+                <div id="loading-message" class="loading-message" style="display: none;">
+                    Loading products...
+                </div>
+                <div id="error-message-products" class="error-message" style="display: none;"></div>
+                
+                <table id="products-table" class="products-table">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Supplier</th>
+                            <th>Unit Price</th>
+                            <th>Stock</th>
+                            <th>Min Level</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-tbody">
+                        <tr>
+                            <td colspan="9" class="no-data">No products found. Click "Add Product" to get started!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="products-summary">
+                <span>Total Products: <strong id="total-products">0</strong></span>
+                <span class="divider">|</span>
+                <span class="low-stock-count">Low Stock Items: <strong id="low-stock-count">0</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Product</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modal-error" class="error-message" style="display: none;"></div>
+                
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sku">SKU *</label>
+                            <input type="text" id="sku" required placeholder="e.g., PROD-001">
+                            <small>Unique product identifier</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="product-name">Product Name *</label>
+                            <input type="text" id="product-name" required placeholder="e.g., Laptop Dell XPS 15">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" rows="3" placeholder="Product description..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">Category *</label>
+                            <input type="text" id="category" required list="categories-list" placeholder="e.g., Electronics">
+                            <datalist id="categories-list"></datalist>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="supplier">Supplier *</label>
+                            <input type="text" id="supplier" required list="suppliers-list" placeholder="e.g., TechSupply Inc">
+                            <datalist id="suppliers-list"></datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="unit-price">Unit Price ($) *</label>
+                            <input type="number" id="unit-price" step="0.01" min="0.01" required placeholder="0.00">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity-in-stock">Initial Stock</label>
+                            <input type="number" id="quantity-in-stock" min="0" value="0" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="min-stock-level">Min Stock Level *</label>
+                            <input type="number" id="min-stock-level" min="0" value="10" required placeholder="10">
+                            <small>Alert threshold for low stock</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="unit-of-measure">Unit of Measure</label>
+                            <select id="unit-of-measure">
+                                <option value="units">Units</option>
+                                <option value="boxes">Boxes</option>
+                                <option value="pieces">Pieces</option>
+                                <option value="kg">Kilograms</option>
+                                <option value="liters">Liters</option>
+                                <option value="meters">Meters</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancel-btn">Cancel</button>
+                        <button type="submit" class="btn-primary" id="submit-product-btn">Save Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Update Modal -->
+    <div id="stock-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Update Stock</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="stock-modal-error" class="error-message" style="display: none;"></div>
+                
+                <div class="stock-info">
+                    <p><strong>Product:</strong> <span id="stock-product-name"></span></p>
+                    <p><strong>Current Stock:</strong> <span id="stock-current-qty"></span></p>
+                </div>
+
+                <form id="stock-form">
+                    <input type="hidden" id="stock-product-id">
+                    
+                    <div class="form-group">
+                        <label for="movement-type">Movement Type *</label>
+                        <select id="movement-type" required>
+                            <option value="stock-in">Stock In (Receive/Purchase)</option>
+                            <option value="stock-out">Stock Out (Sale/Use)</option>
+                            <option value="adjustment">Adjustment</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity *</label>
+                        <input type="number" id="quantity" min="1" required placeholder="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reference-number">Reference Number</label>
+                        <input type="text" id="reference-number" placeholder="e.g., PO-12345, INV-789">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" rows="3" placeholder="Additional notes..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancel-stock-btn">Cancel</button>
+                        <button type="submit" class="btn-primary">Update Stock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Product Details</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="product-details" class="product-details"></div>
+                <div class="modal-section">
+                    <h4>Stock Movement History</h4>
+                    <div id="movements-container" class="movements-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/inventory.js"></script>
+</body>
+</html>
