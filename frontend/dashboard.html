@@ -4,74 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Smart Inventory Management</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>🏢 Smart Inventory Management System</h1>
-            <div class="header-actions">
-                <a href="profile.html" class="btn-secondary">👤 Profile</a>
-                <button id="logout-btn" class="btn-logout">Logout</button>
-            </div>
-        </div>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
 
-        <div class="dashboard-content">
-            <div class="welcome-card">
-                <h2>Welcome, <span id="user-name"></span>!</h2>
-                <div class="user-info">
-                    <div class="info-item">
-                        <span class="label">Username:</span>
-                        <span class="value" id="user-username"></span>
+        <main class="main-content">
+
+            <!-- Broadcast Banner -->
+            <div id="broadcast-banner" class="card" style="display:none; background: linear-gradient(135deg,#4f46e5,#6366f1); color:white; margin-bottom:1.5rem; padding:1rem 1.5rem; align-items:center; gap:1rem; border:none;">
+                <span style="font-size:1.25rem;">📢</span>
+                <span id="banner-message" style="font-weight:500;"></span>
+            </div>
+
+            <!-- Page Header -->
+            <header class="page-header">
+                <div class="page-title">
+                    <h1 id="dashboard-title">Dashboard</h1>
+                    <p>Welcome back, <strong id="welcome-name"></strong>!</p>
+                </div>
+                <div style="font-size:0.75rem; color:var(--slate-400);">
+                    Last sync: <span id="last-sync-time">—</span>
+                </div>
+            </header>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="card stat-card">
+                    <div class="stat-icon" style="background:#eef2ff;">📦</div>
+                    <div class="stat-value" id="total-products">—</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon" style="background:#fef3c7;">⚠️</div>
+                    <div class="stat-value" id="low-stock-count">—</div>
+                    <div class="stat-label">Low Stock Items</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon" style="background:#d1fae5;">📝</div>
+                    <div class="stat-value" id="total-transactions">—</div>
+                    <div class="stat-label">Transactions Today</div>
+                </div>
+                <div id="active-users-card" class="card stat-card" style="display:none;">
+                    <div class="stat-icon" style="background:#dbeafe;">👥</div>
+                    <div class="stat-value" id="active-users">—</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+
+            <!-- Two-column layout -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h3 style="margin-bottom:1rem; font-size:1rem; color:var(--slate-700);">⚡ Quick Actions</h3>
+                    <div id="quick-actions-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <!-- Populated by JS -->
                     </div>
-                    <div class="info-item">
-                        <span class="label">Email:</span>
-                        <span class="value" id="user-email"></span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Role:</span>
-                        <span class="badge" id="user-role"></span>
+                </div>
+
+                <!-- Recent Movements -->
+                <div class="card">
+                    <h3 style="margin-bottom:1rem; font-size:1rem; color:var(--slate-700);">🔄 Recent Activity</h3>
+                    <div id="recent-movements-list">
+                        <div style="text-align:center; color:var(--slate-400); padding:1rem;">Loading...</div>
                     </div>
                 </div>
             </div>
 
-            <div class="features-grid">
-                <a href="inventory.html" class="feature-card">
-                    <div class="icon">📦</div>
-                    <h3>Products</h3>
-                    <p>Manage your inventory</p>
-                </a>
+            <!-- Top Products (Admin only, hidden initially) -->
+            <div id="top-products-card" class="card" style="display:none; margin-bottom:1.5rem;">
+                <h3 style="margin-bottom:1rem; font-size:1rem; color:var(--slate-700);">🏆 Top Stocked Products</h3>
+                <div id="top-products-list"></div>
+            </div>
 
-                <a href="reports.html" class="feature-card">
-                    <div class="icon">📊</div>
-                    <h3>Reports</h3>
-                    <p>View sales reports</p>
-                </a>
-
-                <div class="feature-card disabled">
-                    <div class="icon">🔔</div>
-                    <h3>Alerts</h3>
-                    <p>Low stock notifications</p>
-                    <small>Coming Soon</small>
-                </div>
-
-                <div class="feature-card disabled">
-                    <div class="icon">📝</div>
-                    <h3>Transactions</h3>
-                    <p>Track movements</p>
-                    <small>Coming Soon</small>
+            <!-- System Status (Admin only) -->
+            <div id="system-status-card" class="card" style="display:none;">
+                <h3 style="margin-bottom:1rem; font-size:1rem; color:var(--slate-700);">🖥️ System Status</h3>
+                <div style="display:flex; gap:2rem; flex-wrap:wrap;">
+                    <div><span style="color:var(--accent-emerald); font-weight:600;">● API</span> <span style="color:var(--slate-500); font-size:0.85rem;">Online</span></div>
+                    <div><span style="color:var(--accent-emerald); font-weight:600;">● Database</span> <span style="color:var(--slate-500); font-size:0.85rem;">Connected</span></div>
+                    <div><span style="color:var(--accent-emerald); font-weight:600;">● Alerts</span> <span style="color:var(--slate-500); font-size:0.85rem;">Active</span></div>
                 </div>
             </div>
 
-            <div class="info-banner">
-                <h3>✅ Milestone 2 Complete: Product Management</h3>
-                <p><strong id="role-info"></strong></p>
-                <p class="small-text">
-                    Password reset available in Profile • Products and Reports fully functional
-                </p>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script src="js/utils.js"></script>

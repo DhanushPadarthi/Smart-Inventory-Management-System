@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders - Admin - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .status-select {
+            padding: 0.4rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--slate-200);
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .status-select:focus {
+            border-color: var(--primary-500);
+        }
+    </style>
+</head>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>Order fulfillment</h1>
+                    <p>Track customer orders and manage delivery status</p>
+                </div>
+            </header>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3>All Customer Orders</h3>
+                    <div>
+                        <input type="text" id="order-search" class="form-control" placeholder="Search customer or product..." style="width: 300px;">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Current Status</th>
+                                <th>Change Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-list">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem; color: var(--slate-500);">Loading system orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/admin-orders.js"></script>
+</body>
+</html>

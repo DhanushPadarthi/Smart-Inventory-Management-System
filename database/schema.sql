@@ -95,6 +95,33 @@ CREATE TABLE IF NOT EXISTS suppliers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Alerts table
+CREATE TABLE IF NOT EXISTS alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER,
+    alert_type TEXT,
+    message TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    acknowledged_at TIMESTAMP,
+    acknowledged_by INTEGER,
+    FOREIGN KEY(product_id) REFERENCES products(id),
+    FOREIGN KEY(acknowledged_by) REFERENCES users(id)
+);
+
+-- Transactions table
+CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    product_id INTEGER,
+    transaction_type TEXT,
+    quantity INTEGER,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(product_id) REFERENCES products(id)
+);
+
 -- Indexes for products
 CREATE INDEX idx_sku ON products(sku);
 CREATE INDEX idx_product_name ON products(product_name);

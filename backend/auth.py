@@ -481,3 +481,173 @@ def change_password(db_connection):
         
     except Exception as e:
         return jsonify({'error': f'Password change failed: {str(e)}'}), 500
+
+def get_all_users(db_connection):
+    """Get all users (Admin only)"""
+    try:
+        # Get current user ID from JWT
+        current_user_id = int(get_jwt_identity())
+        
+        # Check if using SQLite or MySQL
+        from backend.config import Config
+        use_sqlite = Config.USE_SQLITE
+        
+        cursor = db_connection.cursor()
+        
+        # Verify admin access
+        if use_sqlite:
+            cursor.execute("SELECT role FROM users WHERE user_id = ?", (current_user_id,))
+        else:
+            cursor.execute("SELECT role FROM users WHERE user_id = %s", (current_user_id,))
+        
+        row = cursor.fetchone()
+        current_role = row[0] if isinstance(row, tuple) else row['role']
+        
+        if current_role != 'admin':
+            return jsonify({'error': 'Unauthorized. Admin access required'}), 403
+            
+        if use_sqlite:
+            query = "SELECT user_id, username, email, role, first_name, last_name, is_active, created_at FROM users"
+        else:
+            query = "SELECT user_id, username, email, role, first_name, last_name, is_active, created_at FROM users"
+            
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        users = []
+        if use_sqlite:
+            from database.database import dict_from_row
+            users = [dict_from_row(r) for r in rows]
+        else:
+            users = rows
+            
+        cursor.close()
+        return jsonify({'users': users}), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to fetch users: {str(e)}'}), 500
+
+@jwt_required()
+def delete_user(db_connection, user_id):
+    try:
+        current_user_id = int(get_jwt_identity())
+        cursor = db_connection.cursor()
+        from backend.config import Config
+        use_sqlite = Config.USE_SQLITE
+        
+        # Verify admin
+        if use_sqlite:
+            cursor.execute("SELECT role FROM users WHERE user_id = ?", (current_user_id,))
+        else:
+            cursor.execute("SELECT role FROM users WHERE user_id = %s", (current_user_id,))
+        
+        row = cursor.fetchone()
+        current_role = row[0] if isinstance(row, tuple) else row['role']
+        
+        if current_role != 'admin':
+            return jsonify({'error': 'Unauthorized. Admin access required'}), 403
+            
+        # Don't allow self deletion
+        if int(user_id) == current_user_id:
+            return jsonify({'error': 'You cannot delete yourself'}), 400
+            
+        # Delete user
+        if use_sqlite:
+            cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+        else:
+            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+            
+        db_connection.commit()
+        cursor.close()
+        return jsonify({'message': 'User deleted successfully'}), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to delete user: {str(e)}'}), 500
+
+@jwt_required()
+def update_profile(db_connection):
+    """Update current user's profile information"""
+    try:
+        user_id = int(get_jwt_identity())
+        data = request.get_json()
+        
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        email = data.get('email')
+        phone = data.get('phone')
+        
+        if not first_name or not last_name or not email:
+            return jsonify({'error': 'First name, last name and email are required'}), 400
+
+        from backend.config import Config
+        use_sqlite = Config.USE_SQLITE
+        cursor = db_connection.cursor()
+
+        # Check if email is taken by another user
+        if use_sqlite:
+            cursor.execute("SELECT user_id FROM users WHERE email = ? AND user_id != ?", (email, user_id))
+        else:
+            cursor.execute("SELECT user_id FROM users WHERE email = %s AND user_id != %s", (email, user_id))
+        
+        if cursor.fetchone():
+            cursor.close()
+            return jsonify({'error': 'Email is already taken by another user'}), 409
+
+        if use_sqlite:
+            cursor.execute("""
+                UPDATE users 
+                SET first_name = ?, last_name = ?, email = ?, phone = ?
+                WHERE user_id = ?
+            """, (first_name, last_name, email, phone, user_id))
+        else:
+            cursor.execute("""
+                UPDATE users 
+                SET first_name = %s, last_name = %s, email = %s, phone = %s
+                WHERE user_id = %s
+            """, (first_name, last_name, email, phone, user_id))
+            
+        db_connection.commit()
+        cursor.close()
+        return jsonify({'message': 'Profile updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': f'Failed to update profile: {str(e)}'}), 500
+
+@jwt_required()
+def get_user_stats(db_connection):
+    """Get current user's account statistics"""
+    try:
+        user_id = int(get_jwt_identity())
+        cursor = db_connection.cursor()
+        from backend.config import Config
+        use_sqlite = Config.USE_SQLITE
+
+        # Total transactions by this user
+        if use_sqlite:
+            cursor.execute("SELECT COUNT(*) as total FROM stock_movements WHERE created_by = ?", (user_id,))
+        else:
+            cursor.execute("SELECT COUNT(*) as total FROM stock_movements WHERE created_by = %s", (user_id,))
+        
+        row = cursor.fetchone()
+        count = row[0] if isinstance(row, tuple) else row['total']
+
+        # Last activity
+        if use_sqlite:
+            cursor.execute("SELECT created_at, movement_type FROM stock_movements WHERE created_by = ? ORDER BY created_at DESC LIMIT 1", (user_id,))
+        else:
+            cursor.execute("SELECT created_at, movement_type FROM stock_movements WHERE created_by = %s ORDER BY created_at DESC LIMIT 1", (user_id,))
+        
+        last_act_row = cursor.fetchone()
+        last_activity = None
+        if last_act_row:
+            if isinstance(last_act_row, tuple):
+                last_activity = {'date': last_act_row[0], 'type': last_act_row[1]}
+            else:
+                last_activity = {'date': last_act_row['created_at'], 'type': last_act_row['movement_type']}
+
+        cursor.close()
+        return jsonify({
+            'total_transactions': count,
+            'last_activity': last_activity
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

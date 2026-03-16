@@ -1,92 +1,124 @@
 // Protect the profile page
 protectPage();
 
-// Load user data
-const user = getCurrentUser();
+document.addEventListener('DOMContentLoaded', () => {
+    loadProfileData();
+    loadProfileStats();
+    setupEventListeners();
+});
 
-if (user) {
-    // Display user information
-    document.getElementById('user-fullname').textContent = `${user.first_name} ${user.last_name}`;
-    document.getElementById('user-username').textContent = user.username;
-    document.getElementById('user-email').textContent = user.email;
-    document.getElementById('user-phone').textContent = user.phone || 'Not provided';
-    
-    const roleBadge = document.getElementById('user-role');
-    roleBadge.textContent = user.role.toUpperCase();
-    roleBadge.classList.add(user.role);
-    
-    // Format created date
-    if (user.created_at) {
-        const createdDate = new Date(user.created_at);
-        document.getElementById('user-created').textContent = createdDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+async function loadProfileData() {
+    try {
+        // Fetch fresh user data from server
+        const data = await apiCall('/auth/me', 'GET');
+        const user = data.user;
+        if (!user) return;
+
+        // Populate header and visuals
+        const fullName = `${user.first_name} ${user.last_name}`;
+        document.getElementById('user-fullname-header').textContent = fullName;
+        document.getElementById('user-joined-date').textContent = new Date(user.created_at).toLocaleDateString();
+        
+        const avatarInitials = (user.first_name.charAt(0) + (user.last_name ? user.last_name.charAt(0) : '')).toUpperCase();
+        document.getElementById('profile-avatar').textContent = avatarInitials;
+        
+        const roleBadge = document.getElementById('user-role-badge');
+        const badgeClass = user.role === 'admin' ? 'badge-blue' : 'badge-warning';
+        roleBadge.innerHTML = `<span class="badge ${badgeClass}">${user.role.toUpperCase()}</span>`;
+
+        // Populate Form Fields
+        document.getElementById('edit-first-name').value = user.first_name || '';
+        document.getElementById('edit-last-name').value = user.last_name || '';
+        document.getElementById('edit-email').value = user.email || '';
+        document.getElementById('edit-phone').value = user.phone || '';
+    } catch (error) {
+        console.error('Failed to load profile details:', error);
     }
 }
 
-// Show error in password section
-function showPasswordError(message) {
-    const errorDiv = document.getElementById('password-error');
-    const successDiv = document.getElementById('password-success');
-    
-    successDiv.style.display = 'none';
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-    
-    setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 5000);
+async function loadProfileStats() {
+    try {
+        const stats = await apiCall('/auth/profile/stats', 'GET');
+        
+        document.getElementById('stat-total-trans').textContent = stats.total_transactions || 0;
+        
+        const lastActEl = document.getElementById('stat-last-activity');
+        if (stats.last_activity) {
+            const date = new Date(stats.last_activity.date).toLocaleDateString();
+            const type = stats.last_activity.type.replace('-', ' ').toUpperCase();
+            lastActEl.textContent = `${type} on ${date}`;
+        } else {
+            lastActEl.textContent = 'None yet';
+        }
+    } catch (error) {
+        console.error('Failed to load stats:', error);
+    }
 }
 
-// Show success in password section
-function showPasswordSuccess(message) {
-    const errorDiv = document.getElementById('password-error');
-    const successDiv = document.getElementById('password-success');
-    
-    errorDiv.style.display = 'none';
-    successDiv.textContent = message;
-    successDiv.style.display = 'block';
-    
-    setTimeout(() => {
-        successDiv.style.display = 'none';
-    }, 5000);
+function setupEventListeners() {
+    const editForm = document.getElementById('edit-profile-form');
+    if (editForm) {
+        editForm.addEventListener('submit', handleProfileUpdate);
+    }
+
+    const passwordForm = document.getElementById('change-password-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', handlePasswordChange);
+    }
 }
 
-// Change password form
-const passwordForm = document.getElementById('change-password-form');
+async function handleProfileUpdate(e) {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-profile-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
 
-passwordForm.addEventListener('submit', async (e) => {
+    const payload = {
+        first_name: document.getElementById('edit-first-name').value.trim(),
+        last_name: document.getElementById('edit-last-name').value.trim(),
+        email: document.getElementById('edit-email').value.trim(),
+        phone: document.getElementById('edit-phone').value.trim()
+    };
+
+    try {
+        await apiCall('/auth/profile', 'PUT', payload);
+        showSuccess('Profile updated successfully!');
+        
+        // Refresh local storage if needed, or just reload page data
+        // For simplicity, we re-fetch data to reflect changes
+        loadProfileData();
+        
+        // Update sidebar if it exists
+        if (typeof setupSidebar === 'function') setupSidebar();
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Profile Changes';
+    }
+}
+
+async function handlePasswordChange(e) {
     e.preventDefault();
     
     const currentPassword = document.getElementById('current-password').value;
     const newPassword = document.getElementById('new-password').value;
     const confirmPassword = document.getElementById('confirm-new-password').value;
     
-    // Validate passwords match
     if (newPassword !== confirmPassword) {
-        showPasswordError('New passwords do not match');
+        showError('New passwords do not match');
         return;
     }
     
-    // Validate password strength
-    const passwordError = validatePassword(newPassword);
-    if (passwordError) {
-        showPasswordError(passwordError);
+    const validation = validatePassword(newPassword);
+    if (!validation.isValid) {
+        showError(validation.message || 'Password does not meet requirements');
         return;
     }
     
-    // Check if new password is same as current
-    if (currentPassword === newPassword) {
-        showPasswordError('New password must be different from current password');
-        return;
-    }
-    
-    // Disable submit button
-    const submitBtn = passwordForm.querySelector('button[type="submit"]');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Changing Password...';
+    submitBtn.textContent = 'Updating...';
     
     try {
         await apiCall('/auth/change-password', 'PUT', {
@@ -94,25 +126,12 @@ passwordForm.addEventListener('submit', async (e) => {
             new_password: newPassword
         });
         
-        showPasswordSuccess('Password changed successfully!');
-        
-        // Clear form
-        passwordForm.reset();
-        
-        // Re-enable submit button
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Change Password';
-        
+        showSuccess('Password updated successfully!');
+        e.target.reset();
     } catch (error) {
-        showPasswordError(error.message);
+        showError(error.message);
+    } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Change Password';
+        submitBtn.textContent = 'Update Password';
     }
-});
-
-// Logout button
-document.getElementById('logout-btn').addEventListener('click', () => {
-    if (confirm('Are you sure you want to logout?')) {
-        logout();
-    }
-});
+}

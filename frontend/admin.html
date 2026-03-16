@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>User Management</h1>
+                    <p>Manage system users and their roles</p>
+                </div>
+            </header>
+
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="table-container">
+                    <table id="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Role Modal -->
+    <div id="role-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Change User Role</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="role-form">
+                    <input type="hidden" id="modal-user-id">
+                    <div class="form-group">
+                        <label class="form-label" id="modal-user-name-display"></label>
+                        <select id="new-role" class="form-control">
+                            <option value="admin">Administrator</option>
+                            <option value="client">Employee / Client</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close">Cancel</button>
+                <button id="save-role-btn" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script>
+        protectPage();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = getCurrentUser();
+            if (user && user.role !== 'admin') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            loadUsers();
+            
+            // Modal logic
+            document.querySelectorAll('.close').forEach(btn => {
+                btn.onclick = () => document.getElementById('role-modal').style.display = 'none';
+            });
+            
+            document.getElementById('save-role-btn').onclick = updateRole;
+        });
+
+        async function loadUsers() {
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">Loading users...</td></tr>';
+            
+            try {
+                const data = await apiCall('/auth/users', 'GET');
+                if (data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">No users found.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.users.map(u => `
+                    <tr>
+                        <td><strong>${u.first_name} ${u.last_name}</strong></td>
+                        <td>${u.username}</td>
+                        <td>${u.email}</td>
+                        <td><span class="badge ${u.role === 'admin' ? 'badge-blue' : 'badge-warning'}">${u.role.toUpperCase()}</span></td>
+                        <td><span class="badge ${u.is_active ? 'badge-success' : 'badge-danger'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+                        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" 
+                                onclick="openRoleModal(${u.user_id}, '${u.first_name} ${u.last_name}', '${u.role}')">Role</button>
+                            <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" 
+                                onclick="deleteUser(${u.user_id}, '${u.first_name} ${u.last_name}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showError('Failed to load users');
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:red;">Error loading users.</td></tr>';
+            }
+        }
+
+        function openRoleModal(userId, name, currentRole) {
+            document.getElementById('modal-user-id').value = userId;
+            document.getElementById('modal-user-name-display').textContent = `User: ${name}`;
+            document.getElementById('new-role').value = currentRole;
+            document.getElementById('role-modal').style.display = 'block';
+        }
+
+        async function updateRole() {
+            const userId = document.getElementById('modal-user-id').value;
+            const newRole = document.getElementById('new-role').value;
+            
+            try {
+                await apiCall('/auth/change-role', 'PUT', {
+                    user_id: parseInt(userId),
+                    new_role: newRole
+                });
+                showSuccess('User role updated successfully');
+                document.getElementById('role-modal').style.display = 'none';
+                loadUsers();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function deleteUser(userId, name) {
+            const currentUser = getCurrentUser();
+            if (currentUser && currentUser.user_id === userId) {
+                showError("You cannot delete your own admin account!");
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete user "${name}"? This action cannot be undone.`)) return;
+            
+            try {
+                await apiCall(`/auth/users/${userId}`, 'DELETE');
+                showSuccess(`User ${name} deleted successfully`);
+                loadUsers();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -28,8 +28,7 @@ if (document.getElementById('login-form')) {
             });
             
             // Save token and user data
-            localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            login(data.access_token, data.user);
             
             showSuccess('Login successful! Redirecting...');
             
@@ -74,9 +73,9 @@ if (document.getElementById('register-form')) {
         }
         
         // Validate password strength
-        const passwordError = validatePassword(formData.password);
-        if (passwordError) {
-            showError(passwordError);
+        const passwordValidation = validatePassword(formData.password);
+        if (!passwordValidation.isValid) {
+            showError('Password does not meet requirements');
             return;
         }
         

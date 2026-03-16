@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .product-card {
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        .product-image {
+            height: 180px;
+            background: var(--slate-100);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>Marketplace</h1>
+                    <p>Browse products and place your orders here</p>
+                </div>
+            </header>
+
+            <div id="shop-loading" class="card" style="text-align: center; padding: 3rem;">
+                <p>Loading products...</p>
+            </div>
+
+            <div id="product-list" class="product-grid" style="display: none;">
+                <!-- Products will be injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Buy Modal -->
+    <div id="buy-modal" class="modal">
+        <div class="modal-content glass-card" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Checkout Order</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="checkout-product-info" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+                    <div style="font-size: 2rem;">🛍️</div>
+                    <div>
+                        <h3 id="checkout-name">Product Name</h3>
+                        <p id="checkout-price" style="color: var(--primary-600); font-weight: 700;">$0.00</p>
+                    </div>
+                </div>
+                
+                <form id="order-form">
+                    <input type="hidden" id="order-product-id">
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" id="order-quantity" class="form-control" value="1" min="1" required>
+                        <p id="stock-hint" style="font-size: 0.75rem; color: var(--slate-500); margin-top: 0.25rem;">Checking availability...</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Method</label>
+                        <select id="payment-method" class="form-control" required>
+                            <option value="Cash on Delivery">Cash on Delivery</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Credit/Debit Card">Credit/Debit Card</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Shipping Address</label>
+                        <textarea id="order-address" class="form-control" rows="2" placeholder="Enter your delivery address" required></textarea>
+                    </div>
+                    
+                    <div style="background: var(--slate-50); padding: 1rem; border-radius: var(--radius-md); margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Subtotal:</span>
+                            <span id="order-subtotal">$0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; border-top: 1px solid var(--slate-200); padding-top: 0.5rem; margin-top: 0.5rem;">
+                            <span>Total Payable:</span>
+                            <span id="order-total">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div id="upi-section" style="display: none; margin-top: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: var(--radius-md); border: 1px dashed var(--primary-300);">
+                        <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Scan QR or use UPI ID: <b>smartinv@upi</b></p>
+                        <button type="button" id="pay-now-btn" class="btn btn-primary" style="background: var(--accent-emerald); border-color: var(--accent-emerald);">Pay Now</button>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <button type="submit" id="confirm-order-btn" class="btn btn-primary" style="width: 100%;">Confirm & Place Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/shop.js"></script>
+</body>
+</html>

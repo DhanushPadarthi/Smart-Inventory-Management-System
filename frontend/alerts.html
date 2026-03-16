@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <span class="brand-icon">📦</span>
+                <span>SmartInventory</span>
+            </div>
+            <div class="nav-links" id="main-nav-links"></div>
+            <div class="nav-auth" id="nav-auth-section"></div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>🔔 Alerts &amp; Notifications</h1>
+            </div>
+
+            <!-- Admin View -->
+            <div id="admin-view" style="display:none;">
+                <div class="card" style="margin-bottom:1.5rem;">
+                    <div class="card-header">
+                        <h3>Create Broadcast Alert</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="create-alert-form" style="max-width:600px;">
+                            <div class="form-group" style="margin-bottom:1rem;">
+                                <label style="display:block;margin-bottom:.4rem;font-weight:600;">Alert Message</label>
+                                <textarea id="alert-message-input" class="form-input" rows="3"
+                                    placeholder="Enter broadcast message for all users..." required
+                                    style="width:100%;resize:vertical;"></textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom:1.2rem;">
+                                <label style="display:block;margin-bottom:.4rem;font-weight:600;">Alert Type</label>
+                                <select id="alert-type-input" class="form-input" style="width:100%;max-width:300px;">
+                                    <option value="broadcast">Broadcast</option>
+                                    <option value="low_stock">Low Stock</option>
+                                    <option value="maintenance">Maintenance</option>
+                                    <option value="info">Info</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Alert</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:1.5rem;">
+                    <div class="card-header">
+                        <h3>Active Alerts</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Type</th>
+                                        <th>Message</th>
+                                        <th>Created</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="active-alerts-table">
+                                    <tr><td colspan="5" class="no-data">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Alert History</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Type</th>
+                                        <th>Message</th>
+                                        <th>Created</th>
+                                        <th>Acknowledged By</th>
+                                        <th>Acknowledged At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alert-history-table">
+                                    <tr><td colspan="6" class="no-data">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User View -->
+            <div id="user-view" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Your Notifications</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="user-notifications-list">
+                            <p class="no-data">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/alerts.js"></script>
+</body>
+</html>

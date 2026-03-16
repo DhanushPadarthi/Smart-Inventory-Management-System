@@ -113,6 +113,59 @@ def init_db():
                 )
             """)
             
+            # Create alerts table - Milestone 3
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS alerts (
+                    alert_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    product_id INTEGER,
+                    alert_type TEXT NOT NULL,
+                    alert_message TEXT NOT NULL,
+                    is_acknowledged INTEGER DEFAULT 0,
+                    acknowledged_at TIMESTAMP,
+                    acknowledged_by INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+                    FOREIGN KEY (acknowledged_by) REFERENCES users(user_id) ON DELETE SET NULL
+                )
+            """)
+            
+            # Create transactions table - Milestone 4
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS transactions (
+                    transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    product_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
+                    transaction_type TEXT NOT NULL,
+                    quantity INTEGER NOT NULL,
+                    unit_price REAL NOT NULL,
+                    total_amount REAL NOT NULL,
+                    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    notes TEXT,
+                    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+                )
+            """)
+
+            # Create orders table - Milestone 5
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS orders (
+                    order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    product_id INTEGER NOT NULL,
+                    quantity INTEGER NOT NULL,
+                    unit_price REAL NOT NULL,
+                    total_amount REAL NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'Pending',
+                    payment_status TEXT NOT NULL DEFAULT 'Paid', 
+                    payment_method TEXT,
+                    shipping_address TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+                    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+                )
+            """)
+            
             # Create categories table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS categories (

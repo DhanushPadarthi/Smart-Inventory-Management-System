@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>My Orders</h1>
+                    <p>Track your purchase history and delivery status</p>
+                </div>
+            </header>
+
+            <div class="card">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-list">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--slate-500);">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/orders.js"></script>
+</body>
+</html>

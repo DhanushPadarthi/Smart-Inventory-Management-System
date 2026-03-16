@@ -9,47 +9,92 @@ let isAdmin = currentUser && currentUser.role === 'admin';
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-    setupRoleBasedUI();
-    loadReportsData();
+    if (isAdmin) {
+        setupAdminView();
+        loadReportsData();
+    } else {
+        setupUserView();
+        loadUserReports();
+    }
 });
 
-// Setup role-based UI
-function setupRoleBasedUI() {
-    if (!isAdmin) {
-        // Hide admin-only features for clients
-        const exportSection = document.querySelector('.export-section');
-        if (exportSection) {
-            exportSection.style.display = 'none';
-        }
-        
-        // Update page title for clients
-        const pageTitle = document.querySelector('.page-header h2');
-        if (pageTitle) {
-            pageTitle.textContent = '📊 Reports & Product Catalog';
-        }
-    }
+// ── ADMIN VIEW ──────────────────────────────────────────────
+function setupAdminView() {
+    document.getElementById('admin-view').style.display = 'block';
+    document.getElementById('user-view').style.display = 'none';
+    document.getElementById('actions-header').style.display = '';
 }
 
-// Logout button
-document.getElementById('logout-btn').addEventListener('click', () => {
-    if (confirm('Are you sure you want to logout?')) {
-        logout();
-    }
-});
-
-// Load all reports data
+// Load all reports data (admin)
 async function loadReportsData() {
     try {
         const data = await apiCall('/products', 'GET');
         allProducts = data.products;
-        
         calculateStats();
         renderCategoryReport();
         renderLowStockReport();
-        
     } catch (error) {
         console.error('Failed to load reports data:', error);
         alert('Failed to load reports data: ' + error.message);
+    }
+}
+
+// ── USER VIEW ────────────────────────────────────────────────
+function setupUserView() {
+    document.getElementById('admin-view').style.display = 'none';
+    document.getElementById('user-view').style.display = 'block';
+    document.getElementById('reports-page-title').textContent = 'My Reports';
+    document.getElementById('reports-page-subtitle').textContent = 'Your order history and purchase summary';
+}
+
+async function loadUserReports() {
+    try {
+        const data = await apiCall('/orders', 'GET');
+        const orders = data.orders || [];
+
+        // Calculate user stats
+        const totalOrders = orders.length;
+        const totalSpent = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+        const pending = orders.filter(o => ['Under Process', 'Shipped'].includes(o.status)).length;
+        const delivered = orders.filter(o => o.status === 'Delivered').length;
+
+        document.getElementById('user-total-orders').textContent = totalOrders;
+        document.getElementById('user-total-spent').textContent = '$' + totalSpent.toFixed(2);
+        document.getElementById('user-pending-orders').textContent = pending;
+        document.getElementById('user-delivered-orders').textContent = delivered;
+
+        // Render order history table
+        const tbody = document.getElementById('user-orders-table');
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--slate-400);">You haven\'t placed any orders yet. <a href="shop.html" style="color:var(--primary-600);">Go to Shop →</a></td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = orders.map(o => {
+            let badgeClass = 'badge-blue';
+            if (o.status === 'Delivered') badgeClass = 'badge-success';
+            else if (o.status === 'Cancelled') badgeClass = 'badge-danger';
+            else if (o.status === 'Shipped') badgeClass = 'badge-warning';
+
+            return `
+                <tr>
+                    <td style="font-weight:600;">#ORD-${o.order_id}</td>
+                    <td>${o.product_name}</td>
+                    <td>${o.quantity}</td>
+                    <td>$${parseFloat(o.unit_price).toFixed(2)}</td>
+                    <td style="font-weight:600;">$${parseFloat(o.total_amount).toFixed(2)}</td>
+                    <td>
+                        <div style="font-size:0.85rem;">${o.payment_method}</div>
+                        <div style="font-size:0.75rem;color:${o.payment_status === 'Paid' ? 'var(--accent-emerald)' : 'var(--accent-amber)'};">${o.payment_status}</div>
+                    </td>
+                    <td><span class="badge ${badgeClass}">${o.status}</span></td>
+                    <td style="color:var(--slate-500);font-size:0.85rem;">${new Date(o.created_at).toLocaleDateString()}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Failed to load user reports:', error);
+        document.getElementById('user-orders-table').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--accent-rose);">Failed to load your reports.</td></tr>';
     }
 }
 
@@ -108,21 +153,21 @@ function renderCategoryReport() {
         // Determine status
         let status = '';
         if (product.quantity_in_stock === 0) {
-            status = '<span class="status-badge out-of-stock">Out of Stock</span>';
+            status = '<span class="badge badge-danger">Out of Stock</span>';
         } else if (product.quantity_in_stock <= product.min_stock_level) {
-            status = '<span class="status-badge low-stock">Low Stock</span>';
+            status = '<span class="badge badge-warning">Low Stock</span>';
         } else {
-            status = '<span class="status-badge in-stock">In Stock</span>';
+            status = '<span class="badge badge-success">In Stock</span>';
         }
         
         // Admin-only action buttons
         let actionsCell = '';
         if (isAdmin) {
             actionsCell = `
-                <td class="admin-only">
-                    <div class="action-buttons">
-                        <button class="btn-action btn-stock" onclick="quickStock(${product.product_id}, '${product.product_name}', ${product.quantity_in_stock})">📦 Stock</button>
-                        <button class="btn-action btn-edit" onclick="goToEdit(${product.product_id})">✏️</button>
+                <td>
+                    <div style="display:flex;gap:0.25rem;">
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="quickStock(${product.product_id}, '${product.product_name.replace(/'/g, "&#39;")}', ${product.quantity_in_stock})">📦 Stock</button>
+                        <button class="btn btn-secondary" style="padding:0.25rem 0.5rem;font-size:0.75rem;" onclick="goToEdit(${product.product_id})">✏️</button>
                     </div>
                 </td>
             `;
@@ -142,13 +187,6 @@ function renderCategoryReport() {
             </tr>
         `;
     }).join('');
-    
-    // Hide admin-only columns for clients
-    if (!isAdmin) {
-        document.querySelectorAll('.admin-only').forEach(el => {
-            el.style.display = 'none';
-        });
-    }
 }
 
 // Render low stock report
@@ -171,20 +209,19 @@ function renderLowStockReport() {
     
     tbody.innerHTML = lowStockProducts.map(product => {
         const shortage = Math.max(0, product.min_stock_level - product.quantity_in_stock);
-        const rowClass = product.quantity_in_stock === 0 ? 'out-of-stock-row' : 'low-stock-row';
         
         // Determine status
         let status = '';
         if (product.quantity_in_stock === 0) {
-            status = '<span class="status-badge out-of-stock">OUT OF STOCK</span>';
+            status = '<span class="badge badge-danger">OUT OF STOCK</span>';
         } else if (shortage > product.min_stock_level * 0.5) {
-            status = '<span class="status-badge low-stock">CRITICAL</span>';
+            status = '<span class="badge badge-warning">CRITICAL</span>';
         } else {
-            status = '<span class="status-badge low-stock">LOW</span>';
+            status = '<span class="badge badge-warning">LOW</span>';
         }
         
         return `
-            <tr class="${rowClass}">
+            <tr>
                 <td><strong>${product.sku}</strong></td>
                 <td>${product.product_name}</td>
                 <td>${product.category}</td>

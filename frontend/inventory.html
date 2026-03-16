@@ -4,86 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products - Smart Inventory Management</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/inventory.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>🏢 Smart Inventory Management System</h1>
-            <div class="header-actions">
-                <a href="dashboard.html" class="btn-secondary">← Dashboard</a>
-                <a href="profile.html" class="btn-secondary">👤 Profile</a>
-                <button id="logout-btn" class="btn-logout">Logout</button>
-            </div>
-        </div>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
 
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h2>📦 Product Management</h2>
-                <button id="add-product-btn" class="btn-primary">+ Add Product</button>
-            </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>Inventory Management</h1>
+                    <p>Track and manage your products and stock levels</p>
+                </div>
+                <div class="header-actions">
+                    <button id="add-product-btn" class="btn btn-primary">
+                        <span>➕</span> Add New Product
+                    </button>
+                </div>
+            </header>
 
             <!-- Filters -->
-            <div class="filters-section">
-                <div class="filter-group">
-                    <input type="text" id="search-input" placeholder="🔍 Search by name or SKU..." class="search-input">
-                </div>
-                <div class="filter-group">
-                    <select id="category-filter" class="filter-select">
-                        <option value="">All Categories</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <select id="supplier-filter" class="filter-select">
-                        <option value="">All Suppliers</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label class="checkbox-label">
+            <div class="card" style="margin-bottom: 2rem;">
+                <div class="filters-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Search</label>
+                        <input type="text" id="search-input" placeholder="Search SKU or Name..." class="form-control">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Category</label>
+                        <select id="category-filter" class="form-control">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Supplier</label>
+                        <select id="supplier-filter" class="form-control">
+                            <option value="">All Suppliers</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.75rem;">
                         <input type="checkbox" id="low-stock-filter">
-                        Low Stock Only
-                    </label>
+                        <label for="low-stock-filter" style="font-size: 0.875rem; font-weight: 500;">Low Stock Only</label>
+                    </div>
+                    <div>
+                        <button id="clear-filters-btn" class="btn btn-secondary" style="width: 100%;">Clear Filters</button>
+                    </div>
                 </div>
-                <button id="clear-filters-btn" class="btn-secondary">Clear Filters</button>
             </div>
 
             <!-- Products Table -->
-            <div class="table-container">
-                <div id="loading-message" class="loading-message" style="display: none;">
-                    Loading products...
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="table-container">
+                    <div id="loading-message" class="badge badge-blue" style="display: none; margin: 1rem; width: fit-content;">
+                        Loading products...
+                    </div>
+                    <div id="error-message-products" class="badge badge-danger" style="display: none; margin: 1rem;"></div>
+                    
+                    <table id="products-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Supplier</th>
+                                <th>Unit Price</th>
+                                <th>Stock</th>
+                                <th id="min-level-header">Min Level</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
                 </div>
-                <div id="error-message-products" class="error-message" style="display: none;"></div>
-                
-                <table id="products-table" class="products-table">
-                    <thead>
-                        <tr>
-                            <th>SKU</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Supplier</th>
-                            <th>Unit Price</th>
-                            <th>Stock</th>
-                            <th>Min Level</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="products-tbody">
-                        <tr>
-                            <td colspan="9" class="no-data">No products found. Click "Add Product" to get started!</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
 
-            <div class="products-summary">
-                <span>Total Products: <strong id="total-products">0</strong></span>
-                <span class="divider">|</span>
-                <span class="low-stock-count">Low Stock Items: <strong id="low-stock-count">0</strong></span>
+            <div class="products-summary" style="margin-top: 1.5rem; display: flex; gap: 1.5rem; color: var(--slate-500); font-size: 0.875rem;">
+                <span>Total Items: <strong id="total-products" style="color: var(--slate-900);">0</strong></span>
+                <span>Low Stock: <strong id="low-stock-count" style="color: var(--accent-rose);">0</strong></span>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Add/Edit Product Modal -->

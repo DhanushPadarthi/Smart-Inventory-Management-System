@@ -4,84 +4,139 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Smart Inventory Management</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 992px) {
+            .profile-grid { grid-template-columns: 1fr; }
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--slate-100);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--slate-500); font-size: 0.9rem; }
+        .info-value { font-weight: 600; color: var(--slate-800); }
+        
+        .stat-mini-card {
+            background: var(--slate-50);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+    </style>
 </head>
-<body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>🏢 Smart Inventory Management System</h1>
-            <div class="header-actions">
-                <a href="dashboard.html" class="btn-secondary">← Back to Dashboard</a>
-                <button id="logout-btn" class="btn-logout">Logout</button>
-            </div>
-        </div>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
 
-        <div class="dashboard-content">
-            <div class="profile-container">
-                <div class="profile-section">
-                    <h2>👤 Profile Information</h2>
-                    <div class="profile-info">
-                        <div class="info-row">
-                            <span class="label">Full Name:</span>
-                            <span class="value" id="user-fullname"></span>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>My Profile</h1>
+                    <p>Manage your account settings and personal details</p>
+                </div>
+            </header>
+
+            <div class="profile-grid">
+                <!-- Left: Profile Edit & Info -->
+                <div class="left-col">
+                    <div class="card" style="margin-bottom: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                            <div class="avatar" style="width: 80px; height: 80px; font-size: 2rem;" id="profile-avatar">AD</div>
+                            <div>
+                                <h2 id="user-fullname-header" style="margin: 0;">Loading...</h2>
+                                <p id="user-role-badge" style="margin-top: 0.25rem;"><span class="badge badge-blue">ROLE</span></p>
+                                <div style="font-size: 0.85rem; color: var(--slate-400); margin-top: 0.5rem;">
+                                    Joined on <span id="user-joined-date">...</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="info-row">
-                            <span class="label">Username:</span>
-                            <span class="value" id="user-username"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">Email:</span>
-                            <span class="value" id="user-email"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">Phone:</span>
-                            <span class="value" id="user-phone"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">Role:</span>
-                            <span class="badge" id="user-role"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="label">Member Since:</span>
-                            <span class="value" id="user-created"></span>
+
+                        <form id="edit-profile-form">
+                            <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Personal Information</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" id="edit-first-name" class="form-control" placeholder="First Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" id="edit-last-name" class="form-control" placeholder="Last Name" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="edit-email" class="form-control" placeholder="email@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" id="edit-phone" class="form-control" placeholder="Phone Number">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="save-profile-btn">
+                                Save Profile Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Account Statistics -->
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem;">Account Activity Overview</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="stat-mini-card">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+                                <div id="stat-total-trans" style="font-size: 1.25rem; font-weight: 700;">0</div>
+                                <div style="font-size: 0.75rem; color: var(--slate-500);">Total Transactions</div>
+                            </div>
+                            <div class="stat-mini-card">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🕒</div>
+                                <div id="stat-last-activity" style="font-size: 0.9rem; font-weight: 600;">None</div>
+                                <div style="font-size: 0.75rem; color: var(--slate-500);">Last Action</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="profile-section">
-                    <h2>🔒 Change Password</h2>
-                    
-                    <div id="password-error" class="error-message" style="display: none;"></div>
-                    <div id="password-success" class="success-message" style="display: none;"></div>
-
-                    <form id="change-password-form" class="auth-form">
-                        <div class="form-group">
-                            <label for="current-password">Current Password *</label>
-                            <input type="password" id="current-password" name="current_password" required 
-                                   placeholder="Enter current password">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="new-password">New Password *</label>
-                            <input type="password" id="new-password" name="new_password" required 
-                                   placeholder="Enter new password">
-                            <small class="form-help">
-                                Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.
-                            </small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="confirm-new-password">Confirm New Password *</label>
-                            <input type="password" id="confirm-new-password" name="confirm_password" required 
-                                   placeholder="Confirm new password">
-                        </div>
-
-                        <button type="submit" class="btn-primary">Change Password</button>
-                    </form>
+                <!-- Right: Security -->
+                <div class="right-col">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1.5rem;">Security Settings</h3>
+                        <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 1.5rem;">Change your password regularly to keep your account secure.</p>
+                        
+                        <form id="change-password-form">
+                            <div class="form-group">
+                                <label class="form-label">Current Password</label>
+                                <input type="password" id="current-password" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">New Password</label>
+                                <input type="password" id="new-password" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confirm New Password</label>
+                                <input type="password" id="confirm-new-password" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                                Update Password
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="js/utils.js"></script>

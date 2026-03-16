@@ -3,90 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Smart Inventory Management</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Smart Store - Your Inventory Destination</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="auth-container">
-        <div class="auth-card register-card">
-            <div class="auth-header">
-                <h1>🏢 Inventory System</h1>
-                <h2>Register</h2>
-                <p>Create a new account to get started</p>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            
+            <div id="main-nav-links" class="nav-links">
+                <!-- Navigation links will be injected by utils.js -->
             </div>
 
-            <div id="error-message" class="error-message" style="display: none;"></div>
-            <div id="success-message" class="success-message" style="display: none;"></div>
+            <div class="nav-user-profile" id="nav-auth-section">
+                <!-- Login/Register or Profile will be injected by utils.js -->
+            </div>
+        </nav>
 
-            <form id="register-form" class="auth-form">
-                <div class="form-row">
+        <main class="main-content">
+            <!-- Hero Section -->
+            <section class="hero" style="margin-bottom: 3rem; text-align: center; background: var(--grad-primary); color: white; padding: 4rem 2rem; border-radius: var(--radius-2xl);">
+                <h1 style="font-size: 3rem; margin-bottom: 1rem;">Welcome to the Future of Shopping</h1>
+                <p style="font-size: 1.25rem; opacity: 0.9; max-width: 600px; margin: 0 auto 2rem;">Browse our premium selection of products with real-time inventory tracking and seamless ordering.</p>
+                <div style="max-width: 500px; margin: 0 auto; display: flex; gap: 0.5rem;">
+                    <input type="text" id="landing-search" class="form-control" style="background: white;" placeholder="Search products, SKUs, or categories...">
+                    <button class="btn btn-primary" style="background: var(--slate-900); white-space: nowrap;">Search Now</button>
+                </div>
+            </section>
+
+            <!-- Featured Categories -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Browse Products</h2>
+                <div style="display: flex; gap: 0.5rem;" id="category-chips">
+                    <button class="btn btn-secondary category-chip active" data-category="all" onclick="filterProducts('all', currentProducts)">All Items</button>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div id="product-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem;">
+                <!-- Products will be injected by JavaScript -->
+                <div style="grid-column: 1/-1; text-align: center; padding: 4rem;">
+                    <div class="stat-value">Loading Products...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Buy Modal (Consolidated from shop.html) -->
+    <div id="buy-modal" class="modal">
+        <div class="modal-content glass-card" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Checkout Order</h2>
+                <span class="close-modal" onclick="closeBuyModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="checkout-product-info" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+                    <div style="font-size: 2rem;" id="checkout-emoji">🛍️</div>
+                    <div>
+                        <h3 id="checkout-name">Product Name</h3>
+                        <p id="checkout-price" style="color: var(--primary-600); font-weight: 700;">$0.00</p>
+                    </div>
+                </div>
+                
+                <form id="order-form">
+                    <input type="hidden" id="order-product-id">
                     <div class="form-group">
-                        <label for="first_name">First Name *</label>
-                        <input type="text" id="first_name" name="first_name" required placeholder="John">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" id="order-quantity" class="form-control" value="1" min="1" required>
+                        <p id="stock-hint" style="font-size: 0.75rem; color: var(--slate-500); margin-top: 0.25rem;">Checking availability...</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Method</label>
+                        <select id="payment-method" class="form-control" required>
+                            <option value="Cash on Delivery">Cash on Delivery</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Credit/Debit Card">Credit/Debit Card</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="last_name">Last Name *</label>
-                        <input type="text" id="last_name" name="last_name" required placeholder="Doe">
+                        <label class="form-label">Shipping Address</label>
+                        <textarea id="order-address" class="form-control" rows="2" placeholder="Enter your delivery address" required></textarea>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="username">Username *</label>
-                    <input type="text" id="username" name="username" required minlength="3" placeholder="johndoe">
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" required placeholder="john@example.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone" placeholder="+1234567890">
-                </div>
-
-                <div class="form-group">
-                    <label for="role">Role *</label>
-                    <select id="role" name="role" required>
-                        <option value="client">Client</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="password">Password *</label>
-                        <input type="password" id="password" name="password" required placeholder="Enter password">
+                    
+                    <div style="background: var(--slate-50); padding: 1rem; border-radius: var(--radius-md); margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Subtotal:</span>
+                            <span id="order-subtotal">$0.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; border-top: 1px solid var(--slate-200); padding-top: 0.5rem; margin-top: 0.5rem;">
+                            <span>Total Payable:</span>
+                            <span id="order-total">$0.00</span>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm Password *</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm password">
+                    <div id="upi-section" style="display: none; margin-top: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: var(--radius-md); border: 1px dashed var(--primary-300);">
+                        <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Scan QR or use UPI ID: <b>smartinv@upi</b></p>
+                        <button type="button" id="pay-now-btn" class="btn btn-primary" style="background: var(--accent-emerald); border-color: var(--accent-emerald);">Pay Now</button>
                     </div>
-                </div>
 
-                <div class="password-requirements">
-                    <p><strong>Password Requirements:</strong></p>
-                    <ul>
-                        <li>At least 8 characters</li>
-                        <li>One uppercase letter</li>
-                        <li>One lowercase letter</li>
-                        <li>One number</li>
-                        <li>One special character (!@#$%^&*)</li>
-                    </ul>
-                </div>
-
-                <button type="submit" class="btn-primary">Register</button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Already have an account? <a href="login.html">Login here</a></p>
+                    <div style="margin-top: 1.5rem;">
+                        <button type="submit" id="confirm-order-btn" class="btn btn-primary" style="width: 100%;">Confirm & Place Order</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
+    <script>
+        let currentProducts = [];
+        let upiPaid = false;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            protectPage(); // This will setupNavbar via utils
+            await loadProducts();
+            setupOrderListeners();
+        });
+
+        async function loadProducts() {
+            try {
+                const data = await apiCall('/products');
+                currentProducts = data.products || [];
+                renderProducts(currentProducts);
+                
+                // Extract categories for chips
+                const categories = [...new Set(currentProducts.map(p => p.category))];
+                const chipContainer = document.getElementById('category-chips');
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-secondary category-chip';
+                    btn.textContent = cat;
+                    btn.dataset.category = cat;
+                    btn.onclick = (e) => filterProducts(cat, currentProducts, e);
+                    chipContainer.appendChild(btn);
+                });
+
+                // Search logic
+                document.getElementById('landing-search').oninput = (e) => {
+                    const term = e.target.value.toLowerCase();
+                    const filtered = currentProducts.filter(p => 
+                        p.product_name.toLowerCase().includes(term) || 
+                        p.sku.toLowerCase().includes(term) ||
+                        p.category.toLowerCase().includes(term)
+                    );
+                    renderProducts(filtered);
+                };
+            } catch (error) {
+                console.error('Failed to load products:', error);
+            }
+        }
+
+        function renderProducts(products) {
+            const grid = document.getElementById('product-grid');
+            if (products.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:4rem;">No products found matching your criteria.</div>';
+                return;
+            }
+            
+            grid.innerHTML = products.map(p => {
+                const emoji = getEmojiByCategory(p.category);
+                return `
+                <div class="card product-card" style="padding: 0; display: flex; flex-direction: column; height: 100%; transition: transform 0.3s ease;">
+                    <div style="height: 200px; background: var(--slate-100); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative;">
+                        ${emoji}
+                        <span class="badge ${p.quantity_in_stock > 0 ? 'badge-success' : 'badge-danger'}" style="position: absolute; top: 1rem; right: 1rem;">
+                            ${p.quantity_in_stock > 0 ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                    </div>
+                    <div style="padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <h3 style="margin: 0; color: var(--slate-900);">${p.product_name}</h3>
+                            <span style="font-weight: 700; font-size: 1.25rem; color: var(--primary-600);">$${parseFloat(p.unit_price).toFixed(2)}</span>
+                        </div>
+                        <p style="color: var(--slate-500); font-size: 0.875rem; margin-bottom: 1.5rem;">${p.category} • SKU: ${p.sku}</p>
+                        <div style="margin-top: auto;">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="openBuyModal(${p.product_id})" ${p.quantity_in_stock <= 0 ? 'disabled' : ''}>
+                                ${p.quantity_in_stock > 0 ? (isLoggedIn() ? '🛒 Order Now' : '🔑 Login to Order') : 'Out of Stock'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function getEmojiByCategory(cat) {
+            const map = { 'Electronics': '💻', 'Furniture': '🛋️', 'Clothing': '👕', 'Food': '🍏', 'Groceries': '🛒', 'Hardware': '🔨', 'Office': '📎' };
+            return map[cat] || '📦';
+        }
+
+        function filterProducts(category, all, event) {
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+            if(event) event.target.classList.add('active');
+            else document.querySelector('[data-category="all"]').classList.add('active');
+            
+            if (category === 'all') {
+                renderProducts(all);
+            } else {
+                renderProducts(all.filter(p => p.category === category));
+            }
+        }
+
+        // Modal Logic
+        function openBuyModal(productId) {
+            if (!isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const p = currentProducts.find(item => item.product_id === productId);
+            if (!p) return;
+
+            document.getElementById('order-product-id').value = p.product_id;
+            document.getElementById('checkout-name').textContent = p.product_name;
+            document.getElementById('checkout-price').textContent = `$${parseFloat(p.unit_price).toFixed(2)}`;
+            document.getElementById('checkout-emoji').textContent = getEmojiByCategory(p.category);
+            document.getElementById('stock-hint').textContent = `Available stock: ${p.quantity_in_stock}`;
+            
+            const qtyInput = document.getElementById('order-quantity');
+            qtyInput.value = 1;
+            qtyInput.max = p.quantity_in_stock;
+            
+            updateTotals(p.unit_price, 1);
+            
+            document.getElementById('buy-modal').style.display = 'block';
+        }
+
+        function closeBuyModal() {
+            document.getElementById('buy-modal').style.display = 'none';
+            resetOrderForm();
+        }
+
+        function updateTotals(price, qty) {
+            const total = price * qty;
+            document.getElementById('order-subtotal').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function setupOrderListeners() {
+            const qtyInput = document.getElementById('order-quantity');
+            qtyInput.addEventListener('input', (e) => {
+                const id = document.getElementById('order-product-id').value;
+                const p = currentProducts.find(item => item.product_id == id);
+                if (p) updateTotals(p.unit_price, e.target.value);
+            });
+
+            const paymentMethod = document.getElementById('payment-method');
+            const upiSection = document.getElementById('upi-section');
+            const confirmBtn = document.getElementById('confirm-order-btn');
+            const payNowBtn = document.getElementById('pay-now-btn');
+
+            paymentMethod.addEventListener('change', (e) => {
+                if (e.target.value === 'UPI') {
+                    upiSection.style.display = 'block';
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Wait for UPI Payment...';
+                } else {
+                    upiSection.style.display = 'none';
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = 'Confirm & Place Order';
+                    upiPaid = false;
+                }
+            });
+
+            payNowBtn.onclick = () => {
+                payNowBtn.disabled = true;
+                payNowBtn.textContent = 'Processing...';
+                setTimeout(() => {
+                    upiPaid = true;
+                    payNowBtn.style.display = 'none';
+                    upiSection.innerHTML = '<div style="color: var(--accent-emerald); font-weight: 700;">✅ UPI Payment Success!</div>';
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = 'Complete Order';
+                }, 1500);
+            };
+
+            document.getElementById('order-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const method = document.getElementById('payment-method').value;
+                if (method === 'UPI' && !upiPaid) {
+                    alert('Please complete UPI payment first');
+                    return;
+                }
+
+                const payload = {
+                    product_id: parseInt(document.getElementById('order-product-id').value),
+                    quantity: parseInt(document.getElementById('order-quantity').value),
+                    shipping_address: document.getElementById('order-address').value,
+                    payment_method: method
+                };
+
+                try {
+                    await apiCall('/orders', 'POST', payload);
+                    alert('Order placed successfully!');
+                    closeBuyModal();
+                    loadProducts(); 
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        }
+
+        function resetOrderForm() {
+            upiPaid = false;
+            document.getElementById('upi-section').style.display = 'none';
+            document.getElementById('confirm-order-btn').disabled = false;
+            document.getElementById('confirm-order-btn').textContent = 'Confirm & Place Order';
+            document.getElementById('upi-section').innerHTML = `
+                <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Scan QR or use UPI ID: <b>smartinv@upi</b></p>
+                <button type="button" id="pay-now-btn" class="btn btn-primary" style="background: var(--accent-emerald); border-color: var(--accent-emerald);">Pay Now</button>
+            `;
+            // Re-attach payNowBtn click after innerHTML replacement
+            document.getElementById('pay-now-btn').onclick = () => {
+                document.getElementById('pay-now-btn').disabled = true;
+                document.getElementById('pay-now-btn').textContent = 'Processing...';
+                setTimeout(() => {
+                    upiPaid = true;
+                    document.getElementById('pay-now-btn').style.display = 'none';
+                    document.getElementById('upi-section').innerHTML = '<div style="color: var(--accent-emerald); font-weight: 700;">✅ UPI Payment Success!</div>';
+                    document.getElementById('confirm-order-btn').disabled = false;
+                    document.getElementById('confirm-order-btn').textContent = 'Complete Order';
+                }, 1500);
+            };
+            document.getElementById('order-form').reset();
+        }
+
+        window.onclick = (e) => { 
+            if (e.target == document.getElementById('buy-modal')) closeBuyModal();
+        };
+    </script>
+    <style>
+        .product-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-xl); }
+        .category-chip.active { background: var(--primary-600); color: white; border-color: var(--primary-600); }
+    </style>
 </body>
 </html>

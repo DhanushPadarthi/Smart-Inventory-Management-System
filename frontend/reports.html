@@ -4,131 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Smart Inventory Management</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/reports.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>🏢 Smart Inventory Management System</h1>
-            <div class="header-actions">
-                <a href="dashboard.html" class="btn-secondary">← Dashboard</a>
-                <a href="profile.html" class="btn-secondary">👤 Profile</a>
-                <button id="logout-btn" class="btn-logout">Logout</button>
-            </div>
-        </div>
+<body class="fade-in">
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="index.html" class="nav-brand">
+                <span>🏢</span> Smart Store
+            </a>
+            <div id="main-nav-links" class="nav-links"></div>
+            <div class="nav-user-profile" id="nav-auth-section"></div>
+        </nav>
 
-        <div class="dashboard-content">
-            <div class="page-header">
-                <h2>📊 Reports & Analytics</h2>
-            </div>
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-title">
+                    <h1 id="reports-page-title">Reports & Analytics</h1>
+                    <p id="reports-page-subtitle">Inventory summary and stock status</p>
+                </div>
+            </header>
 
-            <!-- Summary Cards -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">📦</div>
-                    <div class="stat-info">
-                        <h3>Total Products</h3>
-                        <p class="stat-value" id="total-products">0</p>
+            <!-- ===== ADMIN VIEW ===== -->
+            <div id="admin-view">
+                <!-- Summary Cards -->
+                <div class="stats-grid">
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#eef2ff;">📦</div>
+                        <div class="stat-value" id="total-products">—</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#d1fae5;">💰</div>
+                        <div class="stat-value" id="total-value">—</div>
+                        <div class="stat-label">Total Inventory Value</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#fef3c7;">⚠️</div>
+                        <div class="stat-value" id="low-stock">—</div>
+                        <div class="stat-label">Low Stock Items</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#fee2e2;">❌</div>
+                        <div class="stat-value" id="out-of-stock">—</div>
+                        <div class="stat-label">Out of Stock</div>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-info">
-                        <h3>Total Inventory Value</h3>
-                        <p class="stat-value" id="total-value">$0.00</p>
+                <!-- All Products Table -->
+                <div class="card" style="padding:0; overflow:hidden; margin-bottom:1.5rem;">
+                    <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--slate-200); display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="font-size:1rem;">📦 All Products</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Supplier</th>
+                                    <th>Unit Price</th>
+                                    <th>In Stock</th>
+                                    <th>Stock Value</th>
+                                    <th>Status</th>
+                                    <th id="actions-header" style="display:none;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="category-table">
+                                <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--slate-400);">Loading data...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="stat-card warning">
-                    <div class="stat-icon">⚠️</div>
-                    <div class="stat-info">
-                        <h3>Low Stock Items</h3>
-                        <p class="stat-value" id="low-stock">0</p>
+                <!-- Low Stock Report -->
+                <div id="low-stock-section" class="card" style="padding:0; overflow:hidden; margin-bottom:1.5rem;">
+                    <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--slate-200);">
+                        <h3 style="font-size:1rem;">⚠️ Low Stock Alert Report</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>In Stock</th>
+                                    <th>Required</th>
+                                    <th>Need to Restock</th>
+                                    <th>Status</th>
+                                    <th>Unit Price</th>
+                                </tr>
+                            </thead>
+                            <tbody id="low-stock-table">
+                                <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--slate-400);">Loading data...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="stat-card danger">
-                    <div class="stat-icon">❌</div>
-                    <div class="stat-info">
-                        <h3>Out of Stock</h3>
-                        <p class="stat-value" id="out-of-stock">0</p>
+                <!-- Export Section -->
+                <div id="export-section" class="card" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; padding:1.25rem 1.5rem;">
+                    <span style="font-weight:600; font-size:0.9rem; color:var(--slate-700); margin-right:0.5rem;">📥 Export Reports:</span>
+                    <button class="btn btn-secondary" onclick="exportToCSV()">📊 Export All Products (CSV)</button>
+                    <button class="btn btn-secondary" onclick="exportLowStockCSV()">⚠️ Export Low Stock (CSV)</button>
+                    <button class="btn btn-secondary" onclick="printReport()">🖨️ Print Report</button>
+                </div>
+            </div>
+
+            <!-- ===== USER VIEW ===== -->
+            <div id="user-view" style="display:none;">
+                <!-- User Stats Cards -->
+                <div class="stats-grid">
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#eef2ff;">🛝</div>
+                        <div class="stat-value" id="user-total-orders">—</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#d1fae5;">💰</div>
+                        <div class="stat-value" id="user-total-spent">—</div>
+                        <div class="stat-label">Total Spent</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#fef3c7;">⏳</div>
+                        <div class="stat-value" id="user-pending-orders">—</div>
+                        <div class="stat-label">Pending / In-Progress</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background:#d1fae5;">✅</div>
+                        <div class="stat-value" id="user-delivered-orders">—</div>
+                        <div class="stat-label">Delivered</div>
+                    </div>
+                </div>
+
+                <!-- Order History Table -->
+                <div class="card" style="padding:0; overflow:hidden; margin-bottom:1.5rem;">
+                    <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--slate-200);">
+                        <h3 style="font-size:1rem;">📝 My Order History</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-orders-table">
+                                <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--slate-400);">Loading orders...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Products List -->
-            <div class="report-section">
-                <h3>📦 All Products</h3>
-                <div class="table-container">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>SKU</th>
-                                <th>Product Name</th>
-                                <th>Category</th>
-                                <th>Supplier</th>
-                                <th>Unit Price</th>
-                                <th>In Stock</th>
-                                <th>Stock Value</th>
-                                <th>Status</th>
-                                <th class="admin-only">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="category-table">
-                            <tr>
-                                <td colspan="8" class="no-data">Loading data...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Low Stock Report -->
-            <div class="report-section">
-                <h3>⚠️ Low Stock Alert Report</h3>
-                <div class="table-container">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>SKU</th>
-                                <th>Product Name</th>
-                                <th>Category</th>
-                                <th>In Stock</th>
-                                <th>Required</th>
-                                <th>Need to Restock</th>
-                                <th>Status</th>
-                                <th>Unit Price</th>
-                            </tr>
-                        </thead>
-                        <tbody id="low-stock-table">
-                            <tr>
-                                <td colspan="8" class="no-data">Loading data...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Export Section (Admin Only) -->
-            <div class="export-section">
-                <h3>📥 Export Reports (Admin Only)</h3>
-                <p>Download inventory and low stock reports in various formats</p>
-                <div class="export-buttons">
-                    <button class="btn-primary" onclick="exportToCSV()">📊 Export All Products (CSV)</button>
-                    <button class="btn-primary" onclick="exportLowStockCSV()">⚠️ Export Low Stock (CSV)</button>
-                    <button class="btn-primary" onclick="printReport()">🖨️ Print Report</button>
-                </div>
-            </div>
-
-            <div class="info-banner" style="margin-top: 30px;">
-                <h3>💡 Admin Features</h3>
-                <p>✅ Quick stock updates from reports • ✅ Export to CSV • ✅ Print reports • ✅ Edit product links</p>
-                <p class="small-text">Clients have read-only access to view products and reports</p>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script src="js/utils.js"></script>

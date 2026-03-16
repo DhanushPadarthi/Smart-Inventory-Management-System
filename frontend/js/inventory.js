@@ -3,262 +3,168 @@ protectPage();
 
 // Global state
 let allProducts = [];
-let categories = [];
-let suppliers = [];
-let currentUser = getCurrentUser();
-let isAdmin = currentUser && currentUser.role === 'admin';
+const currentUser = getCurrentUser();
+const isAdmin = currentUser && currentUser.role === 'admin';
 
-// Modal elements
-const productModal = document.getElementById('product-modal');
-const stockModal = document.getElementById('stock-modal');
-const detailsModal = document.getElementById('details-modal');
-
-// Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-    setupRoleBasedUI();
+    // Hide info if not admin
+    if (!isAdmin) {
+        const minLevelHeader = document.getElementById('min-level-header');
+        if (minLevelHeader) minLevelHeader.style.display = 'none';
+    }
+    
     loadProducts();
-    loadCategories();
-    loadSuppliers();
+    loadFiltersData();
     setupEventListeners();
 });
 
-// Setup role-based UI
-function setupRoleBasedUI() {
-    if (!isAdmin) {
-        // Hide admin-only features for clients
-        const addProductBtn = document.getElementById('add-product-btn');
-        if (addProductBtn) {
-            addProductBtn.style.display = 'none';
-        }
-        
-        // Hide filters for clients (optional - you can keep this if clients should filter)
-        // const filtersSection = document.querySelector('.filters-section');
-        // if (filtersSection) filtersSection.style.display = 'none';
-    }
-}
-
-// Setup event listeners
 function setupEventListeners() {
-    // Add product button
-    document.getElementById('add-product-btn').addEventListener('click', () => {
-        openProductModal();
-    });
+    const addBtn = document.getElementById('add-product-btn');
+    if (addBtn) {
+        if (!isAdmin) {
+            addBtn.style.display = 'none';
+        } else {
+            addBtn.onclick = () => openProductModal();
+        }
+    }
+
+    document.getElementById('product-form').onsubmit = handleProductSubmit;
+    document.getElementById('stock-form').onsubmit = handleStockSubmit;
+
+    document.getElementById('search-input').oninput = applyFilters;
+    document.getElementById('category-filter').onchange = applyFilters;
+    document.getElementById('supplier-filter').onchange = applyFilters;
+    document.getElementById('low-stock-filter').onchange = applyFilters;
+    document.getElementById('clear-filters-btn').onclick = clearFilters;
 
     // Close modals
-    document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function() {
-            this.closest('.modal').style.display = 'none';
-        });
+    document.querySelectorAll('.close, #cancel-btn, #cancel-stock-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        };
     });
 
-    // Close modals on outside click
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            e.target.style.display = 'none';
-        }
-    });
-
-    // Product form submit
-    document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
-
-    // Stock form submit
-    document.getElementById('stock-form').addEventListener('submit', handleStockSubmit);
-
-    // Cancel buttons
-    document.getElementById('cancel-btn').addEventListener('click', () => {
-        productModal.style.display = 'none';
-    });
-
-    document.getElementById('cancel-stock-btn').addEventListener('click', () => {
-        stockModal.style.display = 'none';
-    });
-
-    // Filters
-    document.getElementById('search-input').addEventListener('input', applyFilters);
-    document.getElementById('category-filter').addEventListener('change', applyFilters);
-    document.getElementById('supplier-filter').addEventListener('change', applyFilters);
-    document.getElementById('low-stock-filter').addEventListener('change', applyFilters);
-    
-    document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
-
-    // Logout
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        if (confirm('Are you sure you want to logout?')) {
-            logout();
-        }
-    });
+    window.onclick = (e) => {
+        if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+    };
 }
 
-// Load all products
 async function loadProducts() {
+    const tbody = document.getElementById('products-tbody');
     try {
-        showLoading(true);
         const data = await apiCall('/products', 'GET');
-        allProducts = data.products;
+        allProducts = data.products || [];
         renderProducts(allProducts);
         updateSummary();
-        showLoading(false);
     } catch (error) {
-        showLoading(false);
-        showError('Failed to load products: ' + error.message, 'error-message-products');
+        showError('Failed to load products');
+        const colCount = isAdmin ? 9 : 8;
+        tbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center; padding:2rem; color:var(--accent-rose);">Error loading products.</td></tr>`;
     }
 }
 
-// Render products table
 function renderProducts(products) {
     const tbody = document.getElementById('products-tbody');
-    
+    const colCount = isAdmin ? 9 : 8;
     if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="no-data">No products found.</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center; padding:2rem; color:var(--slate-500);">No products found.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = products.map(product => {
-        // Build action buttons based on user role
-        let actionButtons = `
-            <button class="btn-action btn-view" onclick="viewProduct(${product.product_id})">View</button>
+    tbody.innerHTML = products.map(p => {
+        let statusBadge = '';
+        if (p.quantity_in_stock === 0) statusBadge = '<span class="badge badge-danger">OUT OF STOCK</span>';
+        else if (p.is_low_stock) statusBadge = '<span class="badge badge-warning">LOW STOCK</span>';
+        else statusBadge = '<span class="badge badge-success">IN STOCK</span>';
+
+        let minLevelCell = isAdmin ? `<td>${p.min_stock_level}</td>` : '';
+
+        let actions = `
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="viewProduct(${p.product_id})">View</button>
         `;
         
-        // Admin-only buttons (clients only see View button)
         if (isAdmin) {
-            actionButtons += `
-                <button class="btn-action btn-stock" onclick="openStockModal(${product.product_id})">Stock</button>
-                <button class="btn-action btn-edit" onclick="editProduct(${product.product_id})">Edit</button>
-                <button class="btn-action btn-delete" onclick="deleteProduct(${product.product_id}, '${product.product_name}')">Delete</button>
+            actions += `
+                <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="openStockModal(${p.product_id})">Stock</button>
+                <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="editProduct(${p.product_id})">Edit</button>
+                <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="deleteProduct(${p.product_id}, '${p.product_name}')">Del</button>
             `;
         }
-        
+        actions += '</div>';
+
         return `
             <tr>
-                <td><strong>${product.sku}</strong></td>
-                <td>${product.product_name}</td>
-                <td>${product.category}</td>
-                <td>${product.supplier}</td>
-                <td>$${parseFloat(product.unit_price).toFixed(2)}</td>
-                <td>${product.quantity_in_stock} ${product.unit_of_measure}</td>
-                <td>${product.min_stock_level}</td>
-                <td>${getStatusBadge(product)}</td>
-                <td>
-                    <div class="action-buttons">
-                        ${actionButtons}
-                    </div>
-                </td>
+                <td><strong>${p.sku}</strong></td>
+                <td>${p.product_name}</td>
+                <td><span class="badge badge-secondary">${p.category}</span></td>
+                <td>${p.supplier}</td>
+                <td>$${parseFloat(p.unit_price).toFixed(2)}</td>
+                <td><strong>${p.quantity_in_stock}</strong> <span style="font-size: 0.7rem; color: var(--slate-400);">${p.unit_of_measure}</span></td>
+                ${minLevelCell}
+                <td>${statusBadge}</td>
+                <td>${actions}</td>
             </tr>
         `;
     }).join('');
 }
 
-// Get status badge HTML
-function getStatusBadge(product) {
-    const qty = product.quantity_in_stock;
-    const minLevel = product.min_stock_level;
-
-    if (qty === 0) {
-        return '<span class="status-badge out-of-stock">Out of Stock</span>';
-    } else if (qty <= minLevel) {
-        return '<span class="status-badge low-stock">Low Stock</span>';
-    } else {
-        return '<span class="status-badge in-stock">In Stock</span>';
-    }
-}
-
-// Update summary
 function updateSummary() {
     const total = allProducts.length;
     const lowStock = allProducts.filter(p => p.is_low_stock).length;
-    
     document.getElementById('total-products').textContent = total;
     document.getElementById('low-stock-count').textContent = lowStock;
 }
 
-// Load categories for filter
-async function loadCategories() {
+async function loadFiltersData() {
     try {
-        const data = await apiCall('/categories', 'GET');
-        categories = data.categories;
+        const [cats, sups] = await Promise.all([
+            apiCall('/categories', 'GET'),
+            apiCall('/suppliers', 'GET')
+        ]);
         
-        const categoryFilter = document.getElementById('category-filter');
-        const categoriesList = document.getElementById('categories-list');
-        
-        categories.forEach(cat => {
-            // Add to filter dropdown
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            categoryFilter.appendChild(option);
-            
-            // Add to datalist for input
-            const dataOption = document.createElement('option');
-            dataOption.value = cat;
-            categoriesList.appendChild(dataOption);
+        const catSelect = document.getElementById('category-filter');
+        const supSelect = document.getElementById('supplier-filter');
+        const catList = document.getElementById('categories-list');
+        const supList = document.getElementById('suppliers-list');
+
+        cats.categories.forEach(c => {
+            const opt = new Option(c, c);
+            catSelect.add(opt);
+            const dopt = document.createElement('option');
+            dopt.value = c;
+            catList.appendChild(dopt);
         });
-    } catch (error) {
-        console.error('Failed to load categories:', error);
+
+        sups.suppliers.forEach(s => {
+            const opt = new Option(s, s);
+            supSelect.add(opt);
+            const dopt = document.createElement('option');
+            dopt.value = s;
+            supList.appendChild(dopt);
+        });
+    } catch (e) {
+        console.error('Failed to load filter data');
     }
 }
 
-// Load suppliers for filter
-async function loadSuppliers() {
-    try {
-        const data = await apiCall('/suppliers', 'GET');
-        suppliers = data.suppliers;
-        
-        const supplierFilter = document.getElementById('supplier-filter');
-        const suppliersList = document.getElementById('suppliers-list');
-        
-        suppliers.forEach(sup => {
-            // Add to filter dropdown
-            const option = document.createElement('option');
-            option.value = sup;
-            option.textContent = sup;
-            supplierFilter.appendChild(option);
-            
-            // Add to datalist for input
-            const dataOption = document.createElement('option');
-            dataOption.value = sup;
-            suppliersList.appendChild(dataOption);
-        });
-    } catch (error) {
-        console.error('Failed to load suppliers:', error);
-    }
-}
-
-// Apply filters
 function applyFilters() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const categoryFilter = document.getElementById('category-filter').value;
-    const supplierFilter = document.getElementById('supplier-filter').value;
-    const lowStockOnly = document.getElementById('low-stock-filter').checked;
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const cat = document.getElementById('category-filter').value;
+    const sup = document.getElementById('supplier-filter').value;
+    const low = document.getElementById('low-stock-filter').checked;
 
-    let filtered = allProducts;
-
-    // Search filter
-    if (searchTerm) {
-        filtered = filtered.filter(p => 
-            p.product_name.toLowerCase().includes(searchTerm) ||
-            p.sku.toLowerCase().includes(searchTerm)
-        );
-    }
-
-    // Category filter
-    if (categoryFilter) {
-        filtered = filtered.filter(p => p.category === categoryFilter);
-    }
-
-    // Supplier filter
-    if (supplierFilter) {
-        filtered = filtered.filter(p => p.supplier === supplierFilter);
-    }
-
-    // Low stock filter
-    if (lowStockOnly) {
-        filtered = filtered.filter(p => p.is_low_stock);
-    }
+    let filtered = allProducts.filter(p => {
+        const matchesSearch = p.product_name.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search);
+        const matchesCat = !cat || p.category === cat;
+        const matchesSup = !sup || p.supplier === sup;
+        const matchesLow = !low || p.is_low_stock;
+        return matchesSearch && matchesCat && matchesSup && matchesLow;
+    });
 
     renderProducts(filtered);
 }
 
-// Clear all filters
 function clearFilters() {
     document.getElementById('search-input').value = '';
     document.getElementById('category-filter').value = '';
@@ -267,33 +173,30 @@ function clearFilters() {
     renderProducts(allProducts);
 }
 
-// Open product modal (add new)
 function openProductModal(product = null) {
     const modal = document.getElementById('product-modal');
     const form = document.getElementById('product-form');
-    const modalTitle = document.getElementById('modal-title');
+    const title = document.getElementById('modal-title');
     
     form.reset();
-    document.getElementById('modal-error').style.display = 'none';
+    document.getElementById('product-id').value = '';
     
     if (product) {
-        // Edit mode
-        modalTitle.textContent = 'Edit Product';
+        title.textContent = 'Edit Product';
         document.getElementById('product-id').value = product.product_id;
         document.getElementById('sku').value = product.sku;
-        document.getElementById('sku').readOnly = true; // SKU shouldn't change
+        document.getElementById('sku').readOnly = true;
         document.getElementById('product-name').value = product.product_name;
         document.getElementById('description').value = product.description || '';
         document.getElementById('category').value = product.category;
         document.getElementById('supplier').value = product.supplier;
         document.getElementById('unit-price').value = product.unit_price;
         document.getElementById('quantity-in-stock').value = product.quantity_in_stock;
-        document.getElementById('quantity-in-stock').readOnly = true; // Use stock modal for updates
+        document.getElementById('quantity-in-stock').readOnly = true;
         document.getElementById('min-stock-level').value = product.min_stock_level;
         document.getElementById('unit-of-measure').value = product.unit_of_measure;
     } else {
-        // Add mode
-        modalTitle.textContent = 'Add New Product';
+        title.textContent = 'Add New Product';
         document.getElementById('sku').readOnly = false;
         document.getElementById('quantity-in-stock').readOnly = false;
     }
@@ -301,14 +204,10 @@ function openProductModal(product = null) {
     modal.style.display = 'block';
 }
 
-// Handle product form submit
 async function handleProductSubmit(e) {
     e.preventDefault();
-    
-    const productId = document.getElementById('product-id').value;
-    const isEdit = !!productId;
-    
-    const formData = {
+    const pid = document.getElementById('product-id').value;
+    const data = {
         sku: document.getElementById('sku').value.trim().toUpperCase(),
         product_name: document.getElementById('product-name').value.trim(),
         description: document.getElementById('description').value.trim(),
@@ -318,260 +217,117 @@ async function handleProductSubmit(e) {
         min_stock_level: parseInt(document.getElementById('min-stock-level').value),
         unit_of_measure: document.getElementById('unit-of-measure').value
     };
-    
-    // Only include initial stock when adding new product
-    if (!isEdit) {
-        formData.quantity_in_stock = parseInt(document.getElementById('quantity-in-stock').value);
-    }
-    
-    const submitBtn = document.getElementById('submit-product-btn');
-    submitBtn.disabled = true;
-    submitBtn.textContent = isEdit ? 'Updating...' : 'Creating...';
-    
+
+    if (!pid) data.quantity_in_stock = parseInt(document.getElementById('quantity-in-stock').value);
+
     try {
-        if (isEdit) {
-            await apiCall(`/products/${productId}`, 'PUT', formData);
-            showSuccessToast('Product updated successfully!');
+        if (pid) {
+            await apiCall(`/products/${pid}`, 'PUT', data);
+            showSuccess('Product updated!');
         } else {
-            await apiCall('/products', 'POST', formData);
-            showSuccessToast('Product created successfully!');
+            await apiCall('/products', 'POST', data);
+            showSuccess('Product created!');
         }
-        
-        productModal.style.display = 'none';
+        document.getElementById('product-modal').style.display = 'none';
         loadProducts();
-        loadCategories();
-        loadSuppliers();
-        
-    } catch (error) {
-        showModalError(error.message, 'modal-error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Save Product';
+    } catch (err) {
+        showError(err.message);
     }
 }
 
-// Edit product
-async function editProduct(productId) {
+async function deleteProduct(id, name) {
+    if (!confirm(`Delete ${name}?`)) return;
     try {
-        const data = await apiCall(`/products/${productId}`, 'GET');
+        await apiCall(`/products/${id}`, 'DELETE');
+        showSuccess('Product deleted');
+        loadProducts();
+    } catch (e) {
+        showError('Delete failed');
+    }
+}
+
+async function editProduct(id) {
+    try {
+        const data = await apiCall(`/products/${id}`, 'GET');
         openProductModal(data.product);
-    } catch (error) {
-        alert('Failed to load product: ' + error.message);
+    } catch (e) {
+        showError('Load failed');
     }
 }
 
-// Delete product
-async function deleteProduct(productId, productName) {
-    if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
-        return;
-    }
-    
+async function openStockModal(id) {
     try {
-        await apiCall(`/products/${productId}`, 'DELETE');
-        showSuccessToast('Product deleted successfully!');
-        loadProducts();
-    } catch (error) {
-        alert('Failed to delete product: ' + error.message);
-    }
-}
-
-// Open stock update modal
-async function openStockModal(productId) {
-    try {
-        const data = await apiCall(`/products/${productId}`, 'GET');
-        const product = data.product;
-        
-        document.getElementById('stock-product-id').value = product.product_id;
-        document.getElementById('stock-product-name').textContent = product.product_name;
-        document.getElementById('stock-current-qty').textContent = 
-            `${product.quantity_in_stock} ${product.unit_of_measure}`;
-        
+        const data = await apiCall(`/products/${id}`, 'GET');
+        const p = data.product;
+        document.getElementById('stock-product-id').value = p.product_id;
+        document.getElementById('stock-product-name').textContent = p.product_name;
+        document.getElementById('stock-current-qty').textContent = `${p.quantity_in_stock} ${p.unit_of_measure}`;
         document.getElementById('stock-form').reset();
-        document.getElementById('stock-modal-error').style.display = 'none';
-        
-        stockModal.style.display = 'block';
-    } catch (error) {
-        alert('Failed to load product: ' + error.message);
+        document.getElementById('stock-modal').style.display = 'block';
+    } catch (e) {
+        showError('Load failed');
     }
 }
 
-// Handle stock form submit
 async function handleStockSubmit(e) {
     e.preventDefault();
-    
-    const productId = document.getElementById('stock-product-id').value;
-    
-    const stockData = {
+    const id = document.getElementById('stock-product-id').value;
+    const data = {
         movement_type: document.getElementById('movement-type').value,
         quantity: parseInt(document.getElementById('quantity').value),
         reference_number: document.getElementById('reference-number').value.trim(),
         notes: document.getElementById('notes').value.trim()
     };
-    
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Updating...';
-    
+
     try {
-        await apiCall(`/products/${productId}/stock`, 'PUT', stockData);
-        showSuccessToast('Stock updated successfully!');
-        stockModal.style.display = 'none';
+        await apiCall(`/products/${id}/stock`, 'PUT', data);
+        showSuccess('Stock updated!');
+        document.getElementById('stock-modal').style.display = 'none';
         loadProducts();
-    } catch (error) {
-        showModalError(error.message, 'stock-modal-error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Update Stock';
+    } catch (err) {
+        showError(err.message);
     }
 }
 
-// View product details
-async function viewProduct(productId) {
+async function viewProduct(id) {
     try {
-        const productData = await apiCall(`/products/${productId}`, 'GET');
-        const movementsData = await apiCall(`/products/${productId}/movements`, 'GET');
+        const data = await apiCall(`/products/${id}`, 'GET');
+        const mdata = await apiCall(`/products/${id}/movements`, 'GET');
+        const p = data.product;
         
-        const product = productData.product;
-        const movements = movementsData.movements;
-        
-        // Render product details
-        const detailsHtml = `
-            <div class="detail-row">
-                <span class="detail-label">SKU:</span>
-                <span class="detail-value"><strong>${product.sku}</strong></span>
+        document.getElementById('product-details').innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem;">
+                <div><span style="color:var(--slate-400)">Name:</span> <strong>${p.product_name}</strong></div>
+                <div><span style="color:var(--slate-400)">SKU:</span> <strong>${p.sku}</strong></div>
+                <div><span style="color:var(--slate-400)">Category:</span> ${p.category}</div>
+                <div><span style="color:var(--slate-400)">Supplier:</span> ${p.supplier}</div>
+                <div><span style="color:var(--slate-400)">Price:</span> $${parseFloat(p.unit_price).toFixed(2)}</div>
+                <div><span style="color:var(--slate-400)">Stock:</span> ${p.quantity_in_stock} ${p.unit_of_measure}</div>
             </div>
-            <div class="detail-row">
-                <span class="detail-label">Product Name:</span>
-                <span class="detail-value">${product.product_name}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Description:</span>
-                <span class="detail-value">${product.description || 'N/A'}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Category:</span>
-                <span class="detail-value">${product.category}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Supplier:</span>
-                <span class="detail-value">${product.supplier}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Unit Price:</span>
-                <span class="detail-value">$${parseFloat(product.unit_price).toFixed(2)}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Current Stock:</span>
-                <span class="detail-value"><strong>${product.quantity_in_stock} ${product.unit_of_measure}</strong></span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Min Stock Level:</span>
-                <span class="detail-value">${product.min_stock_level}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Status:</span>
-                <span class="detail-value">${getStatusBadge(product)}</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Created:</span>
-                <span class="detail-value">${new Date(product.created_at).toLocaleString()}</span>
+            <div style="padding: 1rem; border-top: 1px solid var(--slate-200);">
+                <span style="color:var(--slate-400)">Description:</span><br>${p.description || 'No description'}
             </div>
         `;
         
-        document.getElementById('product-details').innerHTML = detailsHtml;
-        
-        // Render movements
-        const movementsContainer = document.getElementById('movements-container');
-        
-        if (movements.length === 0) {
-            movementsContainer.innerHTML = '<div class="no-movements">No stock movements recorded</div>';
+        const mcont = document.getElementById('movements-container');
+        if (!mdata.movements || mdata.movements.length === 0) {
+            mcont.innerHTML = '<div style="text-align:center; color:var(--slate-400);">No movement history</div>';
         } else {
-            movementsContainer.innerHTML = movements.map(m => `
-                <div class="movement-item ${m.movement_type}">
-                    <div class="movement-header">
-                        <span class="movement-type">${m.movement_type.toUpperCase()}</span>
-                        <span class="movement-date">${new Date(m.created_at).toLocaleString()}</span>
+            mcont.innerHTML = mdata.movements.map(m => `
+                <div style="padding: 0.75rem; border-radius: 8px; background: white; border: 1px solid var(--slate-100);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span class="badge ${m.movement_type === 'stock-in' ? 'badge-success' : 'badge-danger'}">${m.movement_type.toUpperCase()}</span>
+                        <span style="font-size: 0.75rem; color: var(--slate-400);">${new Date(m.created_at).toLocaleString()}</span>
                     </div>
-                    <div class="movement-details">
-                        <strong>Quantity:</strong> ${m.quantity} | 
-                        <strong>Before:</strong> ${m.previous_quantity} → 
-                        <strong>After:</strong> ${m.new_quantity}
-                        ${m.reference_number ? `<br><strong>Ref:</strong> ${m.reference_number}` : ''}
-                        ${m.notes ? `<br><strong>Notes:</strong> ${m.notes}` : ''}
+                    <div style="font-size: 0.875rem;">
+                        <strong>Qty: ${m.quantity}</strong> (${m.previous_quantity} → ${m.new_quantity})
+                        ${m.notes ? `<p style="margin-top: 0.25rem; font-style: italic;">Note: ${m.notes}</p>` : ''}
                     </div>
                 </div>
             `).join('');
         }
-        
-        detailsModal.style.display = 'block';
-        
-    } catch (error) {
-        alert('Failed to load product details: ' + error.message);
+        document.getElementById('details-modal').style.display = 'block';
+    } catch (e) {
+        showError('Load failed');
     }
 }
-
-// Utility functions
-function showLoading(show) {
-    document.getElementById('loading-message').style.display = show ? 'block' : 'none';
-}
-
-function showError(message, elementId) {
-    const errorDiv = document.getElementById(elementId);
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-    setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 5000);
-}
-
-function showModalError(message, elementId) {
-    const errorDiv = document.getElementById(elementId);
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
-}
-
-function showSuccessToast(message) {
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = 'success-toast';
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// Add CSS animation for toast
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-`;
-document.head.appendChild(style);

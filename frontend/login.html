@@ -4,44 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Smart Inventory Management</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h1>🏢 Inventory System</h1>
-                <h2>Login</h2>
-                <p>Welcome back! Please login to your account</p>
+<body class="auth-page">
+    <div class="auth-card glass-card fade-in">
+        <div class="auth-header">
+            <div class="sidebar-logo" style="justify-content: center; margin-bottom: 1rem;">
+                <span style="font-size: 2rem;">🏢</span>
             </div>
-
-            <div id="error-message" class="error-message" style="display: none;"></div>
-            <div id="success-message" class="success-message" style="display: none;"></div>
-
-            <form id="login-form" class="auth-form">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="Enter your email">
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required placeholder="Enter your password">
-                </div>
-
-                <button type="submit" class="btn-primary">Login</button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Don't have an account? <a href="index.html">Register here</a></p>
-            </div>
-
-            <div class="demo-credentials">
-                <p><strong>Demo Credentials:</strong></p>
-                <p>Email: <code>admin@inventory.com</code></p>
-                <p>Password: <code>Admin@123</code></p>
-            </div>
+            <h1 style="color: var(--slate-900); font-family: 'Outfit', sans-serif;">Smart Inventory</h1>
+            <p>Enter your credentials to access the system</p>
         </div>
+
+        <div id="error-message" class="badge badge-danger" style="display: none; width: 100%; margin: 0 0 1.5rem 0; padding: 0.75rem; justify-content: center;"></div>
+        <div id="success-message" class="badge badge-success" style="display: none; width: 100%; margin: 0 0 1.5rem 0; padding: 0.75rem; justify-content: center;"></div>
+
+        <form id="login-form" class="auth-form">
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" required placeholder="admin@inventory.com">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Sign In</button>
+        </form>
+
+        <div class="auth-footer" style="margin-top: 2rem; border-top: 1px solid var(--slate-200); padding-top: 1.5rem; text-align: center;">
+            <p>Don't have an account? <a href="register.html" style="color: var(--primary-600); font-weight: 600; text-decoration: none;">Create Account</a></p>
+        </div>
+
     </div>
 
     <script src="js/utils.js"></script>

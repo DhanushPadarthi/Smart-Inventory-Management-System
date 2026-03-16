@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions - Smart Inventory Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/reports.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>🏢 Smart Inventory Management System</h1>
+            <div class="header-actions">
+                <a href="dashboard.html" class="btn-secondary">← Dashboard</a>
+                <a href="profile.html" class="btn-secondary">👤 Profile</a>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+        <div class="dashboard-content">
+            <div class="page-header">
+                <h2>📝 Transactions & Audit Trail</h2>
+            </div>
+            <div class="report-section">
+                <h3>Transaction History</h3>
+                <div class="table-container">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Product</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Timestamp</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-table">
+                            <tr><td colspan="7" class="no-data">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/utils.js"></script>
+    <script src="js/transactions.js"></script>
+</body>
+</html>

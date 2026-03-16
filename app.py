@@ -6,10 +6,16 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required
 from backend.config import Config
 from database.database import get_db_connection, init_db
-from backend.auth import register_user, login_user, get_current_user, refresh_token, change_user_role, change_password
-from backend.inventory import (create_product, get_all_products, get_product, update_product, 
-                               delete_product, update_stock, get_stock_movements, 
-                               get_categories, get_suppliers)
+from backend.reporting import generate_inventory_report, export_inventory_csv, get_admin_analytics
+from backend.dashboard import get_dashboard_stats
+from backend.orders import create_order, get_user_orders, get_all_orders_admin, update_order_status
+from backend.auth import (register_user, login_user, get_current_user, 
+                          refresh_token, change_user_role, change_password,
+                          get_all_users, delete_user, update_profile, get_user_stats)
+from backend.alerts import get_active_alerts, acknowledge_alert, get_alert_history, create_custom_alert
+from backend.inventory import (get_all_products, create_product, get_product, update_product,
+                               delete_product, update_stock, get_stock_movements, get_categories, get_suppliers)
+from backend.transactions import get_all_transactions, get_transaction, create_transaction
 import os
 
 # Initialize Flask app
@@ -77,9 +83,33 @@ def password_change():
     """Change user password"""
     return change_password(get_db())
 
+@app.route('/api/auth/users', methods=['GET'])
+@jwt_required()
+def users_list():
+    """Get all users (Admin only)"""
+    return get_all_users(get_db())
+
+@app.route('/api/auth/users/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def user_delete(user_id):
+    """Delete a user (Admin only)"""
+    return delete_user(get_db(), user_id)
+
+@app.route('/api/auth/profile', methods=['PUT'])
+@jwt_required()
+def profile_update():
+    """Update current user profile"""
+    return update_profile(get_db())
+
+@app.route('/api/auth/profile/stats', methods=['GET'])
+@jwt_required()
+def profile_stats():
+    """Get user profile stats"""
+    return get_user_stats(get_db())
+
 # Product/Inventory Routes - Milestone 2
 @app.route('/api/products', methods=['GET'])
-@jwt_required()
+@jwt_required(optional=True)
 def products_list():
     """Get all products"""
     return get_all_products(get_db())
@@ -136,6 +166,91 @@ def suppliers_list():
 def health():
     """Health check endpoint"""
     return {'status': 'ok', 'message': 'Server is running'}, 200
+
+# Alerts Routes
+@app.route('/api/alerts', methods=['GET'])
+@jwt_required()
+def alerts_list():
+    return get_active_alerts(get_db())
+
+@app.route('/api/alerts/<int:alert_id>/acknowledge', methods=['PUT'])
+@jwt_required()
+def alerts_acknowledge(alert_id):
+    return acknowledge_alert(get_db(), alert_id)
+
+@app.route('/api/alerts/history', methods=['GET'])
+@jwt_required()
+def alerts_history():
+    return get_alert_history(get_db())
+
+@app.route('/api/alerts/custom', methods=['POST'])
+@jwt_required()
+def alerts_custom_create():
+    """Create custom broadcast alert (Admin only)"""
+    return create_custom_alert(get_db())
+
+# Transactions Routes
+@app.route('/api/transactions', methods=['GET'])
+@jwt_required()
+def transactions_list():
+    return get_all_transactions(get_db())
+
+@app.route('/api/transactions/<int:transaction_id>', methods=['GET'])
+@jwt_required()
+def transactions_get(transaction_id):
+    return get_transaction(get_db(), transaction_id)
+
+@app.route('/api/transactions', methods=['POST'])
+@jwt_required()
+def transactions_create():
+    return create_transaction(get_db())
+
+# Reporting Routes
+@app.route('/api/reports/inventory', methods=['GET'])
+@jwt_required()
+def reports_inventory():
+    return generate_inventory_report(get_db())
+
+@app.route('/api/reports/export', methods=['GET'])
+@jwt_required()
+def reports_export():
+    return export_inventory_csv(get_db())
+
+@app.route('/api/stats', methods=['GET'])
+@jwt_required()
+def stats_dashboard():
+    """Get dashboard statistics"""
+    return get_dashboard_stats(get_db())
+
+@app.route('/api/orders', methods=['POST'])
+@jwt_required()
+def orders_create():
+    """Create a new order"""
+    return create_order(get_db())
+
+@app.route('/api/orders', methods=['GET'])
+@jwt_required()
+def orders_user_list():
+    """Get orders for current user"""
+    return get_user_orders(get_db())
+
+@app.route('/api/admin/orders', methods=['GET'])
+@jwt_required()
+def admin_orders_list():
+    """Get all orders (Admin only)"""
+    return get_all_orders_admin(get_db())
+
+@app.route('/api/admin/orders/<int:order_id>/status', methods=['PUT'])
+@jwt_required()
+def admin_order_status_update(order_id):
+    """Update order status (Admin only)"""
+    return update_order_status(get_db(), order_id)
+
+@app.route('/api/admin/analytics', methods=['GET'])
+@jwt_required()
+def admin_analytics():
+    """Get advanced admin analytics"""
+    return get_admin_analytics(get_db())
 
 # Error handlers
 @app.errorhandler(404)

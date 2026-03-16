@@ -260,9 +260,7 @@
 }
 
 /* Admin-only elements */
-.admin-only {
-    /* Will be hidden by JavaScript for non-admin users */
-}
+
 
 /* Print styles */
 @media print {
