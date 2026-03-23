@@ -1,7 +1,7 @@
 """
 Smart Inventory Management System - Main Application
 """
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required
 from backend.config import Config
