@@ -43,7 +43,7 @@ function renderProducts(products) {
             <div class="product-image">${getEmojiByCategory(p.category)}</div>
             <h3 style="margin-bottom: 0.5rem; height: 3rem; overflow: hidden;">${p.product_name}</h3>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary-600);">$${p.unit_price.toFixed(2)}</span>
+                <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary-600);">${formatCurrency(p.unit_price)}</span>
                 <span class="badge ${p.quantity_in_stock > 0 ? 'badge-success' : 'badge-danger'}">
                     ${p.quantity_in_stock > 0 ? p.quantity_in_stock + ' in stock' : 'Out of Stock'}
                 </span>
@@ -80,7 +80,7 @@ function openBuyModal(productId) {
 
     document.getElementById('order-product-id').value = p.product_id;
     document.getElementById('checkout-name').textContent = p.product_name;
-    document.getElementById('checkout-price').textContent = `$${p.unit_price.toFixed(2)}`;
+    document.getElementById('checkout-price').textContent = formatCurrency(p.unit_price);
     document.getElementById('stock-hint').textContent = `Available stock: ${p.quantity_in_stock} ${p.unit_of_measure}`;
     
     const qtyInput = document.getElementById('order-quantity');
@@ -94,8 +94,8 @@ function openBuyModal(productId) {
 
 function updateTotals(price, qty) {
     const total = price * qty;
-    document.getElementById('order-subtotal').textContent = `$${total.toFixed(2)}`;
-    document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('order-subtotal').textContent = formatCurrency(total);
+    document.getElementById('order-total').textContent = formatCurrency(total);
 }
 
 document.getElementById('order-quantity').addEventListener('input', (e) => {

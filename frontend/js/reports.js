@@ -59,7 +59,7 @@ async function loadUserReports() {
         const delivered = orders.filter(o => o.status === 'Delivered').length;
 
         document.getElementById('user-total-orders').textContent = totalOrders;
-        document.getElementById('user-total-spent').textContent = '$' + totalSpent.toFixed(2);
+        document.getElementById('user-total-spent').textContent = formatCurrency(totalSpent);
         document.getElementById('user-pending-orders').textContent = pending;
         document.getElementById('user-delivered-orders').textContent = delivered;
 
@@ -81,8 +81,8 @@ async function loadUserReports() {
                     <td style="font-weight:600;">#ORD-${o.order_id}</td>
                     <td>${o.product_name}</td>
                     <td>${o.quantity}</td>
-                    <td>$${parseFloat(o.unit_price).toFixed(2)}</td>
-                    <td style="font-weight:600;">$${parseFloat(o.total_amount).toFixed(2)}</td>
+                    <td>${formatCurrency(parseFloat(o.unit_price))}</td>
+                    <td style="font-weight:600;">${formatCurrency(parseFloat(o.total_amount))}</td>
                     <td>
                         <div style="font-size:0.85rem;">${o.payment_method}</div>
                         <div style="font-size:0.75rem;color:${o.payment_status === 'Paid' ? 'var(--accent-emerald)' : 'var(--accent-amber)'};">${o.payment_status}</div>
@@ -111,7 +111,7 @@ function calculateStats() {
     
     // Update summary cards
     document.getElementById('total-products').textContent = totalProducts;
-    document.getElementById('total-value').textContent = '$' + totalValue.toFixed(2);
+    document.getElementById('total-value').textContent = formatCurrency(totalValue);
     document.getElementById('low-stock').textContent = lowStockItems;
     document.getElementById('out-of-stock').textContent = outOfStock;
     
@@ -179,9 +179,9 @@ function renderCategoryReport() {
                 <td>${product.product_name}</td>
                 <td>${product.category}</td>
                 <td>${product.supplier}</td>
-                <td>$${parseFloat(product.unit_price).toFixed(2)}</td>
+                <td>${formatCurrency(parseFloat(product.unit_price))}</td>
                 <td>${product.quantity_in_stock} ${product.unit_of_measure}</td>
-                <td><strong>$${stockValue.toFixed(2)}</strong></td>
+                <td><strong>${formatCurrency(parseFloat(stockValue))}</strong></td>
                 <td>${status}</td>
                 ${actionsCell}
             </tr>
@@ -229,7 +229,7 @@ function renderLowStockReport() {
                 <td>${product.min_stock_level} ${product.unit_of_measure}</td>
                 <td class="shortage"><strong>${shortage}</strong> ${product.unit_of_measure}</td>
                 <td>${status}</td>
-                <td>$${parseFloat(product.unit_price).toFixed(2)}</td>
+                <td>${formatCurrency(parseFloat(product.unit_price))}</td>
             </tr>
         `;
     }).join('');

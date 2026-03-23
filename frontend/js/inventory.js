@@ -99,7 +99,7 @@ function renderProducts(products) {
                 <td>${p.product_name}</td>
                 <td><span class="badge badge-secondary">${p.category}</span></td>
                 <td>${p.supplier}</td>
-                <td>$${parseFloat(p.unit_price).toFixed(2)}</td>
+                <td>${formatCurrency(parseFloat(p.unit_price))}</td>
                 <td><strong>${p.quantity_in_stock}</strong> <span style="font-size: 0.7rem; color: var(--slate-400);">${p.unit_of_measure}</span></td>
                 ${minLevelCell}
                 <td>${statusBadge}</td>
@@ -301,7 +301,7 @@ async function viewProduct(id) {
                 <div><span style="color:var(--slate-400)">SKU:</span> <strong>${p.sku}</strong></div>
                 <div><span style="color:var(--slate-400)">Category:</span> ${p.category}</div>
                 <div><span style="color:var(--slate-400)">Supplier:</span> ${p.supplier}</div>
-                <div><span style="color:var(--slate-400)">Price:</span> $${parseFloat(p.unit_price).toFixed(2)}</div>
+                <div><span style="color:var(--slate-400)">Price:</span> ${formatCurrency(parseFloat(p.unit_price))}</div>
                 <div><span style="color:var(--slate-400)">Stock:</span> ${p.quantity_in_stock} ${p.unit_of_measure}</div>
             </div>
             <div style="padding: 1rem; border-top: 1px solid var(--slate-200);">
