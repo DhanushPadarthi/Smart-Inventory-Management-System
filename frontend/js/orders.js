@@ -28,15 +28,19 @@ function renderOrders(orders) {
 
     orders.forEach(order => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td style="font-weight: 600;">#ORD-${order.order_id}</td>
-            <td>${order.product_name}</td>
-            <td>${order.quantity}</td>
-            <td style="font-weight: 600;">${formatCurrency(parseFloat(order.total_amount))}</td>
-            <td>
-                <div style="font-size: 0.85rem;">${order.payment_method}</div>
-                <div style="font-size: 0.75rem; color: ${order.payment_status === 'Paid' ? 'var(--accent-emerald)' : 'var(--accent-amber)'};">  
-        `;
+        const payColor = order.payment_status === 'Paid' ? 'var(--accent-emerald)' : 'var(--accent-amber)';
+        const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString() : '—';
+        tr.innerHTML =
+            '<td style="font-weight:600;">#ORD-' + order.order_id + '</td>' +
+            '<td>' + order.product_name + '</td>' +
+            '<td>' + order.quantity + '</td>' +
+            '<td style="font-weight:600;">' + formatCurrency(parseFloat(order.total_amount)) + '</td>' +
+            '<td>' +
+                '<div style="font-size:0.85rem;">' + (order.payment_method || '—') + '</div>' +
+                '<div style="font-size:0.75rem;color:' + payColor + ';">' + (order.payment_status || '—') + '</div>' +
+            '</td>' +
+            '<td>' + getStatusBadge(order.status || 'Unknown') + '</td>' +
+            '<td style="color:var(--slate-500);font-size:0.85rem;">' + dateStr + '</td>';
         list.appendChild(tr);
     });
 }
