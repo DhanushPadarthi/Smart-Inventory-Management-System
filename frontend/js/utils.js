@@ -275,8 +275,9 @@ function showNotification(message, type = 'success') {
         toast.style.transform = 'translateX(0)';
     });
 
-    // auto-dismiss
-    const timer = setTimeout(() => dismissToast(toast), 4500);
+    // auto-dismiss (success stays longer)
+    const duration = type === 'success' ? 6000 : 4500;
+    const timer = setTimeout(() => dismissToast(toast), duration);
     toast.addEventListener('mouseenter', () => clearTimeout(timer));
     toast.addEventListener('mouseleave', () => setTimeout(() => dismissToast(toast), 1500));
 }

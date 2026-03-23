@@ -195,13 +195,13 @@ function setupEventListeners() {
 
         try {
             await apiCall('/orders', 'POST', payload);
-            showSuccess('Order placed successfully! Track it in My Orders.');
+            // Close modal first so the toast is clearly visible
             modal.style.display = 'none';
             resetOrderForm();
-            loadProducts(); 
+            loadProducts();
+            showSuccess('Order placed! <a href="orders.html" style="color:#fff;text-decoration:underline;font-weight:700;">View My Orders →</a>');
         } catch (error) {
             showError(error.message);
-        } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Confirm & Place Order';
         }
