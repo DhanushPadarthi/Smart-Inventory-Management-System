@@ -22,7 +22,7 @@ function renderOrders(orders) {
     list.innerHTML = '';
 
     if (!orders || orders.length === 0) {
-        list.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--slate-500);">You haven\'t placed any orders yet.</td></tr>';
+        list.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--slate-500);">You haven\'t placed any orders yet. <a href="shop.html" style="color:var(--primary-600);">Go to Shop →</a></td></tr>';
         return;
     }
 
@@ -32,15 +32,10 @@ function renderOrders(orders) {
             <td style="font-weight: 600;">#ORD-${order.order_id}</td>
             <td>${order.product_name}</td>
             <td>${order.quantity}</td>
-            <td style="font-weight: 600;">$${order.total_amount.toFixed(2)}</td>
+            <td style="font-weight: 600;">${formatCurrency(parseFloat(order.total_amount))}</td>
             <td>
                 <div style="font-size: 0.85rem;">${order.payment_method}</div>
-                <div style="font-size: 0.75rem; color: ${order.payment_status === 'Paid' ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
-                    ${order.payment_status}
-                </div>
-            </td>
-            <td>${getStatusBadge(order.status)}</td>
-            <td style="color: var(--slate-500); font-size: 0.85rem;">${new Date(order.created_at).toLocaleDateString()}</td>
+                <div style="font-size: 0.75rem; color: ${order.payment_status === 'Paid' ? 'var(--accent-emerald)' : 'var(--accent-amber)'};">  
         `;
         list.appendChild(tr);
     });
@@ -51,6 +46,28 @@ function getStatusBadge(status) {
     if (status === 'Delivered') badgeClass = 'badge-success';
     if (status === 'Cancelled') badgeClass = 'badge-danger';
     if (status === 'Shipped') badgeClass = 'badge-warning';
+    if (status === 'Under Process') badgeClass = 'badge-info';
     
     return `<span class="badge ${badgeClass}">${status}</span>`;
+}
+
+function exportCSV() {
+    if (!userOrders || userOrders.length === 0) {
+        showInfo('No orders to export.');
+        return;
+    }
+
+    let csv = 'Order ID,Product,Quantity,Total,Payment Method,Payment Status,Order Status,Date\n';
+    userOrders.forEach(o => {
+        const date = new Date(o.created_at).toLocaleDateString();
+        csv += `"#ORD-${o.order_id}","${o.product_name}",${o.quantity},${parseFloat(o.total_amount).toFixed(2)},"${o.payment_method}","${o.payment_status}","${o.status}","${date}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `my-orders-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
