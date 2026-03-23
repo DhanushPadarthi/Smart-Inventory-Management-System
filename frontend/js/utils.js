@@ -133,7 +133,8 @@ function setupNavbar() {
                 { name: '📦 Inventory', href: 'inventory.html' },
                 { name: '🛒 All Orders', href: 'admin-orders.html' },
                 { name: '📜 Reports', href: 'reports.html' },
-                { name: '🔔 Alerts', href: 'alerts.html' }
+                { name: '🔔 Alerts', href: 'alerts.html' },
+                { name: '👥 Users', href: 'admin.html' }
             );
         } else {
             links.push(
