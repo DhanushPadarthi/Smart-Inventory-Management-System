@@ -26,6 +26,19 @@ app.config.from_object(Config)
 CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:5000"]}}, supports_credentials=True)
 jwt = JWTManager(app)
 
+# JWT error handlers — return clean JSON instead of default HTML
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({'error': 'Token has expired. Please log in again.', 'token_expired': True}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return jsonify({'error': 'Invalid token. Please log in again.', 'token_invalid': True}), 401
+
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    return jsonify({'error': 'Authentication required.', 'token_missing': True}), 401
+
 # Database connection
 db = None
 

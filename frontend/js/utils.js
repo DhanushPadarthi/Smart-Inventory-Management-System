@@ -25,6 +25,18 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
         const result = await response.json();
 
+        if (response.status === 401) {
+            // Token expired or invalid — clear credentials and redirect to login
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            const publicPages = ['login.html', 'register.html', ''];
+            const currentPage = window.location.pathname.split('/').pop();
+            if (!publicPages.includes(currentPage)) {
+                window.location.href = 'login.html';
+            }
+            throw new Error(result.error || 'Session expired. Please log in again.');
+        }
+
         if (!response.ok) {
             throw new Error(result.error || result.message || 'Something went wrong');
         }
