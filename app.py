@@ -23,7 +23,7 @@ app = Flask(__name__, static_folder='frontend', static_url_path='')
 app.config.from_object(Config)
 
 # Initialize extensions
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:5000"]}}, supports_credentials=True)
 jwt = JWTManager(app)
 
 # Database connection

@@ -144,8 +144,22 @@ function setupNavbar() {
     // Render Auth Section
     if (user) {
         const initials = (user.first_name.charAt(0) + (user.last_name ? user.last_name.charAt(0) : '')).toUpperCase();
+        const selectedCurrency = localStorage.getItem('selectedCurrency') || 'USD';
+        const currencies = [
+            { code: 'USD', label: '$ USD' },
+            { code: 'EUR', label: '€ EUR' },
+            { code: 'GBP', label: '£ GBP' },
+            { code: 'INR', label: '₹ INR' },
+            { code: 'JPY', label: '¥ JPY' },
+        ];
+        const currencyOptions = currencies.map(c =>
+            `<option value="${c.code}" ${c.code === selectedCurrency ? 'selected' : ''}>${c.label}</option>`
+        ).join('');
         authSection.innerHTML = `
             <div class="nav-user-profile">
+                <select class="currency-selector" id="nav-currency-select" title="Switch Currency">
+                    ${currencyOptions}
+                </select>
                 <div class="avatar" style="width:32px; height:32px; font-size:0.8rem;">${initials}</div>
                 <div class="user-meta" style="font-size: 0.875rem;">
                     <div style="font-weight: 600; color: white;">${user.first_name}</div>
@@ -156,6 +170,15 @@ function setupNavbar() {
                 </button>
             </div>
         `;
+
+        // Currency change handler
+        const currSel = document.getElementById('nav-currency-select');
+        if (currSel) {
+            currSel.addEventListener('change', (e) => {
+                localStorage.setItem('selectedCurrency', e.target.value);
+                window.location.reload();
+            });
+        }
 
         // Setup logout listener
         const logoutBtn = document.getElementById('logout-btn');
@@ -220,4 +243,16 @@ function showSuccess(message) {
 
 function showError(message) {
     showNotification(message, 'error');
+}
+
+// Currency formatting
+function formatCurrency(amount) {
+    const currency = localStorage.getItem('selectedCurrency') || 'USD';
+    const symbols = { USD: '$', EUR: '€', GBP: '£', INR: '₹', JPY: '¥' };
+    const rates   = { USD: 1, EUR: 0.92, GBP: 0.79, INR: 83.5, JPY: 149.5 };
+    const converted = amount * (rates[currency] || 1);
+    const symbol = symbols[currency] || '$';
+    if (currency === 'JPY') return `${symbol}${Math.round(converted).toLocaleString()}`;
+    if (currency === 'INR') return `${symbol}${converted.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    return `${symbol}${converted.toFixed(2)}`;
 }

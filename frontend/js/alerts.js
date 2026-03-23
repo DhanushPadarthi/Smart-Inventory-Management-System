@@ -27,7 +27,7 @@ async function loadActiveAlerts() {
         tbody.innerHTML = alerts.map(alert => `
             <tr>
                 <td>${alert.product_name || 'System Broadcast'}</td>
-                <td><span class="badge badge-warning">${alert.alert_type}</span></td>
+                <td>${getAlertTypeBadge(alert.alert_type)}</td>
                 <td>${alert.alert_message}</td>
                 <td>${new Date(alert.created_at).toLocaleString()}</td>
                 <td>
@@ -53,7 +53,7 @@ async function loadAlertHistory() {
         tbody.innerHTML = alerts.map(alert => `
             <tr>
                 <td>${alert.product_name || 'System Broadcast'}</td>
-                <td><span class="badge badge-blue">${alert.alert_type}</span></td>
+                <td>${getAlertTypeBadge(alert.alert_type)}</td>
                 <td>${alert.alert_message}</td>
                 <td>${new Date(alert.created_at).toLocaleString()}</td>
                 <td>${alert.acknowledged_by_username || 'N/A'}</td>
@@ -91,6 +91,18 @@ async function createAlert(e) {
     }
 }
 
+function getAlertTypeBadge(type) {
+    const map = {
+        'low_stock':   'badge-danger',
+        'broadcast':   'badge-broadcast',
+        'maintenance': 'badge-warning',
+        'info':        'badge-info',
+    };
+    const cls = map[type] || 'badge-blue';
+    const label = type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return `<span class="badge ${cls}">${label}</span>`;
+}
+
 async function loadUserNotifications() {
     const container = document.getElementById('user-notifications-list');
     try {
@@ -107,7 +119,7 @@ async function loadUserNotifications() {
                 <div>
                     <div style="font-weight:600;margin-bottom:.25rem;">
                         ${alert.product_name || 'System Broadcast'}
-                        <span class="badge badge-warning" style="margin-left:.5rem;">${alert.alert_type}</span>
+                        <span style="margin-left:.5rem;">${getAlertTypeBadge(alert.alert_type)}</span>
                     </div>
                     <div style="opacity:.85;">${alert.alert_message}</div>
                     <div style="font-size:.8rem;opacity:.6;margin-top:.25rem;">${new Date(alert.created_at).toLocaleString()}</div>

@@ -173,11 +173,12 @@ h1, h2, h3, h4 {
 }
 
 .glass-card {
-    background: var(--grad-glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--radius-xl);
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
 }
 
 /* Buttons */
@@ -221,6 +222,17 @@ h1, h2, h3, h4 {
     color: white;
 }
 
+.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.35);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
 .btn-logout {
     color: var(--accent-rose);
     border-color: rgba(244, 63, 94, 0.2);
@@ -238,9 +250,11 @@ h1, h2, h3, h4 {
     font-weight: 600;
     color: var(--slate-700);
     margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
 }
 
-.form-control {
+.form-control,
+.form-input {
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: var(--radius-lg);
@@ -248,14 +262,33 @@ h1, h2, h3, h4 {
     background: var(--slate-50);
     font-family: inherit;
     font-size: 0.875rem;
-    transition: all 0.2s;
+    color: var(--slate-800);
+    transition: all 0.2s ease;
+    appearance: auto;
 }
 
-.form-control:focus {
+.form-control:focus,
+.form-input:focus {
     outline: none;
     border-color: var(--primary-500);
     background: white;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.form-control::placeholder,
+.form-input::placeholder {
+    color: var(--slate-400);
+}
+
+select.form-control,
+select.form-input {
+    cursor: pointer;
+}
+
+textarea.form-control,
+textarea.form-input {
+    resize: vertical;
+    min-height: 80px;
 }
 
 /* Tables */
@@ -307,6 +340,10 @@ tr:hover td {
 .badge-warning { background: #fef3c7; color: #92400e; }
 .badge-danger { background: #fee2e2; color: #991b1b; }
 .badge-blue { background: #dbeafe; color: #1e40af; }
+.badge-broadcast { background: #ede9fe; color: #5b21b6; }
+.badge-low_stock { background: #fee2e2; color: #991b1b; }
+.badge-maintenance { background: #fef3c7; color: #92400e; }
+.badge-info { background: #dbeafe; color: #1e40af; }
 
 /* Grid Stats */
 .stats-grid {
@@ -427,12 +464,15 @@ tr:hover td {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--grad-dark);
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 20%, #4f46e5 45%, #6366f1 60%, #2563eb 80%, #0f172a 100%);
 }
 
 .auth-card {
-    max-width: 440px;
+    max-width: 460px;
     width: 100%;
+    padding: 2.5rem;
 }
 
 .auth-header {
@@ -507,3 +547,39 @@ tr:hover td {
     .nav-links { display: none; } /* Could add a mobile menu later */
     .main-content { padding: 2rem 1.5rem; }
 }
+
+/* Currency Selector (Navbar) */
+.currency-selector {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    padding: 0.35rem 0.65rem;
+    font-size: 0.8rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    outline: none;
+}
+
+.currency-selector:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.currency-selector option {
+    background: var(--slate-800);
+    color: white;
+}
+
+/* Stat card gradient icons */
+.stat-icon.grad-indigo  { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
+.stat-icon.grad-emerald { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+.stat-icon.grad-amber   { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+.stat-icon.grad-rose    { background: linear-gradient(135deg, #f43f5e, #e11d48); color: white; }
+.stat-icon.grad-blue    { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+
+/* Data table improvements */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead tr { background: linear-gradient(135deg, var(--slate-50), var(--slate-100)); }
+.data-table tbody tr:hover td { background: rgba(99, 102, 241, 0.03); }

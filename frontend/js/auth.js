@@ -27,6 +27,10 @@ if (document.getElementById('login-form')) {
                 password: password
             });
             
+            // Save currency preference before login
+            const currencyEl = document.getElementById('currency');
+            if (currencyEl) localStorage.setItem('selectedCurrency', currencyEl.value);
+            
             // Save token and user data
             login(data.access_token, data.user);
             

@@ -41,7 +41,7 @@ function renderAllOrders(orders) {
             <td style="font-weight: 600;">${order.customer_name}</td>
             <td>${order.product_name}</td>
             <td>${order.quantity}</td>
-            <td style="font-weight: 600;">$${order.total_amount.toFixed(2)}</td>
+            <td style="font-weight: 600;">${formatCurrency(order.total_amount)}</td>
             <td>
                 <div style="font-size: 0.85rem;">${order.payment_method}</div>
                 <div style="font-size: 0.75rem; color: ${order.payment_status === 'Paid' ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
@@ -98,4 +98,31 @@ function setupSearch() {
         );
         renderAllOrders(filtered);
     });
+}
+
+function exportCSV() {
+    if (!allOrders || allOrders.length === 0) {
+        showError('No orders to export');
+        return;
+    }
+    const headers = ['Order ID', 'Customer', 'Product', 'Quantity', 'Total (USD)', 'Payment Method', 'Payment Status', 'Status', 'Date'];
+    const rows = allOrders.map(o => [
+        `ORD-${o.order_id}`,
+        o.customer_name,
+        o.product_name,
+        o.quantity,
+        o.total_amount.toFixed(2),
+        o.payment_method,
+        o.payment_status,
+        o.status,
+        new Date(o.created_at).toLocaleDateString()
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 }

@@ -1,6 +1,8 @@
 // Orders tracking for individual users
 protectPage();
 
+let userOrders = [];
+
 document.addEventListener('DOMContentLoaded', () => {
     loadUserOrders();
 });
@@ -8,7 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadUserOrders() {
     try {
         const data = await apiCall('/orders', 'GET');
-        renderOrders(data.orders);
+        userOrders = data.orders;
+        renderOrders(userOrders);
     } catch (error) {
         showError('Failed to load your orders');
     }
