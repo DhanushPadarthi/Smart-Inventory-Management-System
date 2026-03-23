@@ -35,7 +35,7 @@ async function loadReportsData() {
         renderLowStockReport();
     } catch (error) {
         console.error('Failed to load reports data:', error);
-        alert('Failed to load reports data: ' + error.message);
+        showError('Failed to load reports data: ' + error.message);
     }
 }
 
@@ -243,7 +243,7 @@ function quickStock(productId, productName, currentStock) {
     
     const match = action.match(/^([+-])(\d+)$/);
     if (!match) {
-        alert('Invalid format! Use +number or -number (e.g., +50 or -20)');
+        showWarning('Invalid format! Use +number or -number (e.g., +50 or -20)');
         return;
     }
     
@@ -262,10 +262,10 @@ async function updateStockQuick(productId, movementType, quantity) {
             notes: 'Quick update from reports'
         });
         
-        alert('✅ Stock updated successfully!');
+        showSuccess('Stock updated successfully!');
         loadReportsData(); // Reload data
     } catch (error) {
-        alert('Failed to update stock: ' + error.message);
+        showError('Failed to update stock: ' + error.message);
     }
 }
 
@@ -307,7 +307,7 @@ function exportLowStockCSV() {
     const lowStock = allProducts.filter(p => p.is_low_stock);
     
     if (lowStock.length === 0) {
-        alert('No low stock items to export!');
+        showInfo('No low stock items to export.');
         return;
     }
     

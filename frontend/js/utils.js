@@ -210,52 +210,94 @@ function setupNavbar() {
     }
 }
 
-// Toast notification system
+// Toast notification system — top-right stacking
+const _toastConfig = {
+    success: { icon: '✓', bg: 'linear-gradient(135deg,#10b981,#059669)', border: '#059669' },
+    error:   { icon: '✕', bg: 'linear-gradient(135deg,#ef4444,#dc2626)', border: '#dc2626' },
+    warning: { icon: '!', bg: 'linear-gradient(135deg,#f59e0b,#d97706)', border: '#d97706' },
+    info:    { icon: 'i', bg: 'linear-gradient(135deg,#6366f1,#4f46e5)', border: '#4f46e5' }
+};
+
 function showNotification(message, type = 'success') {
+    const cfg = _toastConfig[type] || _toastConfig.info;
+
+    // offset existing toasts
+    const existing = document.querySelectorAll('.toast-notification');
+    const offset = existing.length * 76;
+
     const toast = document.createElement('div');
-    toast.className = `toast toast-${type} fade-in`;
-
-    const icon = type === 'success' ? '✅' : '❌';
-
-    toast.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span>${icon}</span>
-            <span>${message}</span>
-        </div>
-    `;
-
+    toast.className = 'toast-notification';
+    toast.dataset.index = existing.length;
     toast.style.cssText = `
         position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background: ${type === 'success' ? 'white' : 'var(--accent-rose)'};
-        color: ${type === 'success' ? 'var(--slate-900)' : 'white'};
-        padding: 1rem 1.5rem;
+        top: calc(1.25rem + ${offset}px);
+        right: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: white;
+        color: #1e293b;
+        padding: 0.875rem 1.25rem;
         border-radius: 12px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        z-index: 9999;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        z-index: 99999;
         font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
         font-weight: 500;
-        border-left: 4px solid ${type === 'success' ? '#10b981' : 'rgba(255,255,255,0.2)'};
+        min-width: 280px;
+        max-width: 380px;
+        border-left: 4px solid ${cfg.border};
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    `;
+
+    toast.innerHTML = `
+        <span style="
+            width:26px;height:26px;border-radius:50%;
+            background:${cfg.bg};
+            color:white;font-weight:700;font-size:0.85rem;
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;
+        ">${cfg.icon}</span>
+        <span style="flex:1;line-height:1.4;">${message}</span>
+        <span onclick="this.parentElement.remove()" style="
+            cursor:pointer;color:#94a3b8;font-size:1.1rem;
+            line-height:1;padding:0 0.25rem;
+            transition:color 0.15s;
+        " onmouseover="this.style.color='#475569'" onmouseout="this.style.color='#94a3b8'">&times;</span>
     `;
 
     document.body.appendChild(toast);
 
+    // slide in
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+    });
+
+    // auto-dismiss
+    const timer = setTimeout(() => dismissToast(toast), 4500);
+    toast.addEventListener('mouseenter', () => clearTimeout(timer));
+    toast.addEventListener('mouseleave', () => setTimeout(() => dismissToast(toast), 1500));
+}
+
+function dismissToast(toast) {
+    if (!toast || !toast.parentElement) return;
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(20px)';
     setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        toast.style.transition = 'all 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+        toast.remove();
+        // re-stack remaining toasts
+        document.querySelectorAll('.toast-notification').forEach((t, i) => {
+            t.style.top = `calc(1.25rem + ${i * 76}px)`;
+        });
+    }, 250);
 }
 
-function showSuccess(message) {
-    showNotification(message, 'success');
-}
-
-function showError(message) {
-    showNotification(message, 'error');
-}
+function showSuccess(message) { showNotification(message, 'success'); }
+function showError(message)   { showNotification(message, 'error');   }
+function showWarning(message) { showNotification(message, 'warning'); }
+function showInfo(message)    { showNotification(message, 'info');    }
 
 // Currency formatting
 function formatCurrency(amount) {
