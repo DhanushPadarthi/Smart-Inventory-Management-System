@@ -139,8 +139,8 @@ function setupNavbar() {
             links.push(
                 { name: '📦 My Orders', href: 'orders.html' },
                 { name: '📜 My Reports', href: 'reports.html' },
-                { name: '� Notifications', href: 'alerts.html' },
-                { name: '�👤 Profile', href: 'profile.html' }
+                { name: '🔔 Notifications', href: 'alerts.html' },
+                { name: '👤 Profile', href: 'profile.html' }
             );
         }
     }
