@@ -123,25 +123,25 @@ function setupNavbar() {
 
     // Define links based on role
     let links = [
-        { name: '🏠 Store', href: 'index.html' }
+        { name: 'Store', href: 'index.html' }
     ];
 
     if (user) {
         if (user.role === 'admin') {
             links.push(
-                { name: '📊 Dashboard', href: 'dashboard.html' },
-                { name: '📦 Inventory', href: 'inventory.html' },
-                { name: '🛒 All Orders', href: 'admin-orders.html' },
-                { name: '📜 Reports', href: 'reports.html' },
-                { name: '🔔 Alerts', href: 'alerts.html' },
-                { name: '👥 Users', href: 'admin.html' }
+                { name: 'Dashboard', href: 'dashboard.html' },
+                { name: 'Inventory', href: 'inventory.html' },
+                { name: 'All Orders', href: 'admin-orders.html' },
+                { name: 'Reports', href: 'reports.html' },
+                { name: 'Alerts', href: 'alerts.html' },
+                { name: 'Users', href: 'admin.html' }
             );
         } else {
             links.push(
-                { name: '📦 My Orders', href: 'orders.html' },
-                { name: '📜 My Reports', href: 'reports.html' },
-                { name: '🔔 Notifications', href: 'alerts.html' },
-                { name: '👤 Profile', href: 'profile.html' }
+                { name: 'My Orders', href: 'orders.html' },
+                { name: 'My Reports', href: 'reports.html' },
+                { name: 'Notifications', href: 'alerts.html' },
+                { name: 'Profile', href: 'profile.html' }
             );
         }
     }
@@ -178,7 +178,7 @@ function setupNavbar() {
                     <div style="font-weight: 600; color: white;">${user.first_name}</div>
                     <div style="font-size: 0.7rem; color: var(--slate-400);">${user.role.toUpperCase()}</div>
                 </div>
-                <button id="logout-btn" class="btn btn-logout" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; margin-left: 1rem;">
+                <button id="logout-btn" class="btn btn-logout" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; margin-left: 1rem; white-space: nowrap;">
                     Sign Out
                 </button>
             </div>
