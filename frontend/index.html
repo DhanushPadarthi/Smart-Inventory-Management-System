@@ -166,13 +166,20 @@
             
             grid.innerHTML = products.map(p => {
                 const emoji = getEmojiByCategory(p.category);
+                const imageSection = p.image_url
+                    ? `<img src="${p.image_url}" alt="${p.product_name}" style="width:100%;height:200px;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                       <div style="display:none;height:200px;background:var(--slate-100);align-items:center;justify-content:center;font-size:3rem;position:relative;">
+                           ${emoji}
+                           <span class="badge ${p.quantity_in_stock > 0 ? 'badge-success' : 'badge-danger'}" style="position:absolute;top:1rem;right:1rem;">${p.quantity_in_stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
+                       </div>`
+                    : `<div style="height:200px;background:var(--slate-100);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;">
+                           ${emoji}
+                           <span class="badge ${p.quantity_in_stock > 0 ? 'badge-success' : 'badge-danger'}" style="position:absolute;top:1rem;right:1rem;">${p.quantity_in_stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
+                       </div>`;
                 return `
                 <div class="card product-card" style="padding: 0; display: flex; flex-direction: column; height: 100%; transition: transform 0.3s ease;">
-                    <div style="height: 200px; background: var(--slate-100); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative;">
-                        ${emoji}
-                        <span class="badge ${p.quantity_in_stock > 0 ? 'badge-success' : 'badge-danger'}" style="position: absolute; top: 1rem; right: 1rem;">
-                            ${p.quantity_in_stock > 0 ? 'In Stock' : 'Out of Stock'}
-                        </span>
+                    <div style="position:relative;">
+                        ${imageSection}
                     </div>
                     <div style="padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">

@@ -46,7 +46,7 @@ function renderProducts(products) {
 
         card.innerHTML = `
             ${imgHtml}
-            <h3 style="margin-bottom: 0.5rem; height: 3rem; overflow: hidden;">${p.product_name}</h3>`
+            <h3 style="margin-bottom: 0.5rem; height: 3rem; overflow: hidden;">${p.product_name}</h3>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary-600);">${formatCurrency(p.unit_price)}</span>
                 <span class="badge ${p.quantity_in_stock > 0 ? 'badge-success' : 'badge-danger'}">

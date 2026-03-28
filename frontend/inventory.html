@@ -128,8 +128,11 @@
 
                     <div class="form-group">
                         <label for="image-url">Product Image URL</label>
-                        <input type="url" id="image-url" placeholder="https://example.com/product-image.jpg">
-                        <small>Paste a direct image link — shown to customers in the shop</small>
+                        <input type="text" id="image-url" placeholder="https://example.com/product-image.jpg" oninput="previewProductImage(this.value)">
+                        <small>Paste a direct image link (.jpg, .png, .webp). <strong>Do NOT paste a Google Images page link</strong> — right-click the image and choose "Copy image address".</small>
+                        <div id="image-preview-wrap" style="display:none;margin-top:0.5rem;">
+                            <img id="image-preview" src="" alt="Preview" style="max-height:100px;max-width:200px;border-radius:6px;border:1px solid var(--slate-200);" onerror="document.getElementById('image-preview-wrap').innerHTML='<span style=color:var(--accent-rose);font-size:0.8rem;>⚠ Cannot load image — make sure the URL is a direct image link.</span>';">
+                        </div>
                     </div>
 
                     <div class="form-row">

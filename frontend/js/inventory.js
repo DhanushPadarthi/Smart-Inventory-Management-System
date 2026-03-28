@@ -180,6 +180,7 @@ function openProductModal(product = null) {
     
     form.reset();
     document.getElementById('product-id').value = '';
+    document.getElementById('image-preview-wrap').style.display = 'none';
     
     if (product) {
         title.textContent = 'Edit Product';
@@ -189,6 +190,7 @@ function openProductModal(product = null) {
         document.getElementById('product-name').value = product.product_name;
         document.getElementById('description').value = product.description || '';
         document.getElementById('image-url').value = product.image_url || '';
+        if (product.image_url) previewProductImage(product.image_url);
         document.getElementById('category').value = product.category;
         document.getElementById('supplier').value = product.supplier;
         document.getElementById('unit-price').value = product.unit_price;
@@ -203,6 +205,25 @@ function openProductModal(product = null) {
     }
     
     modal.style.display = 'block';
+}
+
+function previewProductImage(url) {
+    url = url.trim();
+    // Auto-extract direct URL from Google Images viewer links
+    if (url.includes('google.com/imgres') || url.includes('google.com/search')) {
+        try {
+            const params = new URL(url).searchParams;
+            const imgurl = params.get('imgurl');
+            if (imgurl) {
+                url = decodeURIComponent(imgurl);
+                document.getElementById('image-url').value = url;
+            }
+        } catch (_) {}
+    }
+    const wrap = document.getElementById('image-preview-wrap');
+    if (!url) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    wrap.innerHTML = '<img id="image-preview" src="' + url + '" alt="Preview" style="max-height:100px;max-width:200px;border-radius:6px;border:1px solid var(--slate-200);" onerror="document.getElementById(\'image-preview-wrap\').innerHTML=\'<span style=color:var(--accent-rose);font-size:0.8rem;>\u26a0 Cannot load image \u2014 make sure the URL is a direct image link.</span>\';">';
 }
 
 async function handleProductSubmit(e) {
