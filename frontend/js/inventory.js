@@ -188,6 +188,7 @@ function openProductModal(product = null) {
         document.getElementById('sku').readOnly = true;
         document.getElementById('product-name').value = product.product_name;
         document.getElementById('description').value = product.description || '';
+        document.getElementById('image-url').value = product.image_url || '';
         document.getElementById('category').value = product.category;
         document.getElementById('supplier').value = product.supplier;
         document.getElementById('unit-price').value = product.unit_price;
@@ -211,6 +212,7 @@ async function handleProductSubmit(e) {
         sku: document.getElementById('sku').value.trim().toUpperCase(),
         product_name: document.getElementById('product-name').value.trim(),
         description: document.getElementById('description').value.trim(),
+        image_url: document.getElementById('image-url').value.trim(),
         category: document.getElementById('category').value.trim(),
         supplier: document.getElementById('supplier').value.trim(),
         unit_price: parseFloat(document.getElementById('unit-price').value),

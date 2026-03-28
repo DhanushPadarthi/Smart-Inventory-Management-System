@@ -39,9 +39,14 @@ function renderProducts(products) {
     products.forEach(p => {
         const card = document.createElement('div');
         card.className = 'card product-card';
+        const imgHtml = p.image_url
+            ? `<img src="${p.image_url}" alt="${p.product_name}" style="width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:0.75rem;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+               <div class="product-image" style="display:none;">${getEmojiByCategory(p.category)}</div>`
+            : `<div class="product-image">${getEmojiByCategory(p.category)}</div>`;
+
         card.innerHTML = `
-            <div class="product-image">${getEmojiByCategory(p.category)}</div>
-            <h3 style="margin-bottom: 0.5rem; height: 3rem; overflow: hidden;">${p.product_name}</h3>
+            ${imgHtml}
+            <h3 style="margin-bottom: 0.5rem; height: 3rem; overflow: hidden;">${p.product_name}</h3>`
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary-600);">${formatCurrency(p.unit_price)}</span>
                 <span class="badge ${p.quantity_in_stock > 0 ? 'badge-success' : 'badge-danger'}">

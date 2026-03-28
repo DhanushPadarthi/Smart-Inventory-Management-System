@@ -36,6 +36,7 @@ def create_product(db_connection):
         quantity_in_stock = int(data.get('quantity_in_stock', 0))
         min_stock_level = int(data.get('min_stock_level', 10))
         unit_of_measure = data.get('unit_of_measure', 'units').strip()
+        image_url = data.get('image_url', '').strip()
         
         # Validate SKU format
         if not validate_sku(sku):
@@ -73,18 +74,18 @@ def create_product(db_connection):
             cursor.execute("""
                 INSERT INTO products (sku, product_name, description, category, supplier, 
                                     unit_price, quantity_in_stock, min_stock_level, 
-                                    unit_of_measure, created_by, updated_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    unit_of_measure, image_url, created_by, updated_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (sku, product_name, description, category, supplier, unit_price,
-                  quantity_in_stock, min_stock_level, unit_of_measure, user_id, user_id))
+                  quantity_in_stock, min_stock_level, unit_of_measure, image_url, user_id, user_id))
         else:
             cursor.execute("""
                 INSERT INTO products (sku, product_name, description, category, supplier, 
                                     unit_price, quantity_in_stock, min_stock_level, 
-                                    unit_of_measure, created_by, updated_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                    unit_of_measure, image_url, created_by, updated_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (sku, product_name, description, category, supplier, unit_price,
-                  quantity_in_stock, min_stock_level, unit_of_measure, user_id, user_id))
+                  quantity_in_stock, min_stock_level, unit_of_measure, image_url, user_id, user_id))
         
         product_id = cursor.lastrowid
         
@@ -148,7 +149,7 @@ def get_all_products(db_connection):
         query = """
             SELECT product_id, sku, product_name, description, category, supplier,
                    unit_price, quantity_in_stock, min_stock_level, unit_of_measure,
-                   is_active, created_at, updated_at
+                   image_url, is_active, created_at, updated_at
             FROM products
             WHERE is_active = {}
         """.format(1 if use_sqlite else 'TRUE')
@@ -216,7 +217,7 @@ def get_product(db_connection, product_id):
             cursor.execute("""
                 SELECT product_id, sku, product_name, description, category, supplier,
                        unit_price, quantity_in_stock, min_stock_level, unit_of_measure,
-                       is_active, created_at, updated_at
+                       image_url, is_active, created_at, updated_at
                 FROM products
                 WHERE product_id = ? AND is_active = 1
             """, (product_id,))
@@ -224,7 +225,7 @@ def get_product(db_connection, product_id):
             cursor.execute("""
                 SELECT product_id, sku, product_name, description, category, supplier,
                        unit_price, quantity_in_stock, min_stock_level, unit_of_measure,
-                       is_active, created_at, updated_at
+                       image_url, is_active, created_at, updated_at
                 FROM products
                 WHERE product_id = %s AND is_active = TRUE
             """, (product_id,))
@@ -276,8 +277,8 @@ def update_product(db_connection, product_id):
             return jsonify({'error': 'Product not found'}), 404
         
         # Build update query dynamically
-        allowed_fields = ['product_name', 'description', 'category', 'supplier', 
-                         'unit_price', 'min_stock_level', 'unit_of_measure']
+        allowed_fields = ['product_name', 'description', 'category', 'supplier',
+                         'unit_price', 'min_stock_level', 'unit_of_measure', 'image_url']
         
         update_fields = []
         params = []

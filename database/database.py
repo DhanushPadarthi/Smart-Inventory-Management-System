@@ -85,6 +85,7 @@ def init_db():
                     quantity_in_stock INTEGER NOT NULL DEFAULT 0,
                     min_stock_level INTEGER DEFAULT 10,
                     unit_of_measure TEXT DEFAULT 'units',
+                    image_url TEXT,
                     is_active INTEGER DEFAULT 1,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -94,6 +95,12 @@ def init_db():
                     FOREIGN KEY (updated_by) REFERENCES users(user_id) ON DELETE SET NULL
                 )
             """)
+            # Migration: add image_url to existing databases
+            try:
+                cursor.execute("ALTER TABLE products ADD COLUMN image_url TEXT")
+                connection.commit()
+            except Exception:
+                pass  # Column already exists
             
             # Create stock movements table
             cursor.execute("""
